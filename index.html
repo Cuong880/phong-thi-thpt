@@ -1,0 +1,5151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sắp Xếp Phòng Thi Tốt Nghiệp THPT (Phương án 2+2) - Bản Offline</title>
+  <style>
+    /* ==========================================================================
+       1. DESIGN TOKENS & BASE RESET (100% OFFLINE - ZERO EXTERNAL DEPENDENCIES)
+       ========================================================================== */
+    :root {
+      --bg-page: #f4f6fb;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --bg-muted: #f1f5f9;
+      --border-color: #e2e8f0;
+      --border-light: #edf2f7;
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --primary-border: #c7d2fe;
+
+      --emerald: #059669;
+      --emerald-hover: #047857;
+      --emerald-light: #ecfdf5;
+      --emerald-border: #a7f3d0;
+
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+      --amber-border: #fde68a;
+
+      --rose: #e11d48;
+      --rose-light: #fff1f2;
+      --rose-border: #fecdd3;
+
+      --sky: #0284c7;
+      --sky-light: #f0f9ff;
+      --sky-border: #bae6fd;
+
+      --violet: #7c3aed;
+      --violet-light: #f5f3ff;
+      --violet-border: #ddd6fe;
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.07), 0 2px 6px -2px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.14);
+
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --font-serif-print: "Times New Roman", Times, serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==========================================================================
+       2. LAYOUT CONTAINERS & HEADER
+       ========================================================================== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(255, 255, 255, 0.96);
+      border-bottom: 1px solid var(--border-color);
+      backdrop-filter: blur(8px);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    @media (min-width: 640px) {
+      .container {
+        padding: 0 24px;
+      }
+    }
+
+    .header-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (min-width: 640px) {
+      .brand-title {
+        font-size: 18px;
+      }
+    }
+
+    .offline-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--emerald-light);
+      color: var(--emerald);
+      border: 1px solid var(--emerald-border);
+    }
+
+    .brand-subtitle {
+      margin: 2px 0 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .draft-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+      display: inline-block;
+    }
+
+    .status-dot.saved {
+      background: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+    }
+
+    /* ==========================================================================
+       3. BUTTONS & FORM CONTROLS
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      text-decoration: none;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-indigo-soft {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary-border);
+    }
+
+    .btn-indigo-soft:hover {
+      background: #e0e7ff;
+    }
+
+    .btn-emerald {
+      background: var(--emerald);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.22);
+    }
+
+    .btn-emerald:hover {
+      background: var(--emerald-hover);
+    }
+
+    .btn-emerald-soft {
+      background: var(--emerald-light);
+      color: var(--emerald);
+      border-color: var(--emerald-border);
+    }
+
+    .btn-emerald-soft:hover {
+      background: #d1fae5;
+    }
+
+    .btn-sky-soft {
+      background: var(--sky-light);
+      color: var(--sky);
+      border-color: var(--sky-border);
+    }
+
+    .btn-sky-soft:hover {
+      background: #e0f2fe;
+    }
+
+    .btn-violet-soft {
+      background: var(--violet-light);
+      color: var(--violet);
+      border-color: var(--violet-border);
+    }
+
+    .btn-violet-soft:hover {
+      background: #ede9fe;
+    }
+
+    .btn-amber-soft {
+      background: var(--amber-light);
+      color: var(--amber);
+      border-color: var(--amber-border);
+    }
+
+    .btn-amber-soft:hover {
+      background: #fef3c7;
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      color: var(--text-secondary);
+      border-color: var(--border-color);
+    }
+
+    .btn-outline:hover {
+      background: var(--bg-subtle);
+      color: var(--text-main);
+    }
+
+    .btn-danger-soft {
+      background: var(--rose-light);
+      color: var(--rose);
+      border-color: var(--rose-border);
+    }
+
+    .btn-danger-soft:hover {
+      background: #ffe4e6;
+    }
+
+    .btn-lg {
+      width: 100%;
+      padding: 12px 18px;
+      font-size: 14px;
+      border-radius: 12px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 9px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    .form-control.font-bold {
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       4. CARDS & STEP WORKFLOW GRID
+       ========================================================================== */
+    .main-content {
+      padding: 22px 0 48px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .setup-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 1080px) {
+      .setup-grid {
+        grid-template-columns: 7fr 5fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .step-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .step-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 15.5px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .dropzone {
+      border: 2px dashed #cbd5e1;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.16s ease;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--primary);
+      background: rgba(238, 242, 255, 0.55);
+    }
+
+    .dropzone-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 10px auto;
+      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .dropzone-title {
+      margin: 0;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .dropzone-sub {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .mapping-box {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+    }
+
+    .mapping-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .file-status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    @media (min-width: 560px) {
+      .grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 680px) {
+      .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .validation-box {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      border: 1px solid transparent;
+    }
+
+    .validation-ok {
+      background: var(--emerald-light);
+      color: #065f46;
+      border-color: var(--emerald-border);
+    }
+
+    .validation-warn {
+      background: var(--amber-light);
+      color: #92400e;
+      border-color: var(--amber-border);
+    }
+
+    .validation-err {
+      background: var(--rose-light);
+      color: #9f1239;
+      border-color: var(--rose-border);
+    }
+
+    .card-footer-note {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-light);
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .accordion-box {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      padding: 12px;
+    }
+
+    .accordion-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--primary);
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .sbd-preview-banner {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px dashed var(--primary-border);
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sbd-code {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+
+    /* ==========================================================================
+       5. KPI METRICS & EXPORT TOOLBAR
+       ========================================================================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 960px) {
+      .kpi-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .kpi-label {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .kpi-value {
+      margin: 6px 0 2px 0;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .kpi-sub {
+      margin: 0;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .kpi-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .export-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .export-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .export-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .export-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ==========================================================================
+       6. TABS, FILTERS, SEAT MAP & DATA TABLES
+       ========================================================================== */
+    .workspace-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .workspace-bar {
+      padding: 14px 18px;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tab-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: var(--bg-muted);
+      padding: 4px;
+      border-radius: 11px;
+    }
+
+    .tab-btn {
+      padding: 7px 13px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .workspace-body {
+      padding: 18px;
+    }
+
+    /* Room Summary Cards */
+    .room-card {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 18px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .room-card-header {
+      padding: 12px 16px;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .room-badge-pure {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--emerald-light);
+      color: var(--emerald);
+      border: 1px solid var(--emerald-border);
+    }
+
+    .room-badge-mixed {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--amber-light);
+      color: var(--amber);
+      border: 1px solid var(--amber-border);
+    }
+
+    .shift-summary-bar {
+      padding: 10px 16px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-light);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      font-size: 12.5px;
+    }
+
+    @media (min-width: 768px) {
+      .shift-summary-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .sub-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .sub-li { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .sub-hoa { background: #fdf2f8; color: #be185d; border-color: #fbcfe8; }
+    .sub-sinh { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+    .sub-su { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .sub-dia { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .sub-ktpl { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+    .sub-anh { background: #f0f9ff; color: #0369a1; border-color: #bae6fd; }
+    .sub-tin { background: #ecfeff; color: #0e7490; border-color: #a5f3fc; }
+    .sub-default { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+
+    /* 24-Seat Grid (4 columns x 6 rows) */
+    .seat-grid {
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 560px) {
+      .seat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 960px) {
+      .seat-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .seat-item {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 11px;
+      background: #ffffff;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .seat-item:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .seat-item.highlight {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .seat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .seat-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 1px 6px;
+      border-radius: 5px;
+    }
+
+    .seat-sbd {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .seat-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .seat-meta {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .seat-shifts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 7px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-color);
+    }
+
+    /* Data Tables */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 12px;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .data-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    .data-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    .data-table tr.row-highlight td {
+      background: #fef9c3;
+    }
+
+    .text-center { text-align: center !important; }
+    .text-right { text-align: right !important; }
+    .font-mono { font-family: var(--font-mono); }
+
+    /* ==========================================================================
+       7. A4 PRINT PREVIEW & DIRECT PRINT STYLES (@media print)
+       ========================================================================== */
+    .preview-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      margin-bottom: 16px;
+    }
+
+    .a4-viewport {
+      background: #cbd5e1;
+      padding: 20px 12px;
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+    }
+
+    .a4-sheet {
+      width: 210mm;
+      min-height: 296mm;
+      margin: 0 auto 20px auto;
+      background: #ffffff;
+      color: #000000;
+      font-family: var(--font-serif-print);
+      font-size: 11pt;
+      line-height: 1.3;
+      padding: 10mm 10mm 10mm 12mm;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.22);
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .a4-sheet:last-child {
+      margin-bottom: 0;
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    .a4-header-grid {
+      display: grid;
+      grid-template-columns: 44% 56%;
+      text-align: center;
+      margin-bottom: 8px;
+      font-size: 10.5pt;
+    }
+
+    .a4-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 13pt;
+      margin: 6px 0 4px 0;
+      text-transform: uppercase;
+    }
+
+    .a4-subtitle {
+      text-align: center;
+      font-weight: bold;
+      font-size: 11.5pt;
+      margin-bottom: 8px;
+    }
+
+    .a4-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 9.5pt;
+    }
+
+    .a4-table th, .a4-table td {
+      border: 1px solid #000000;
+      padding: 3.5px 3px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .a4-table th {
+      font-weight: bold;
+      text-align: center;
+      background: #f8fafc;
+    }
+
+    .a4-footer-block {
+      margin-top: 8px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      font-size: 10.5pt;
+    }
+
+    .a4-sign-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      text-align: center;
+      margin-top: 10px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 7mm 8mm;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .a4-sheet {
+        width: 100% !important;
+        min-height: auto !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .a4-table th {
+        background: #ffffff !important;
+      }
+    }
+
+    /* ==========================================================================
+       8. TOAST NOTIFICATIONS & MODAL DIALOG
+       ========================================================================== */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 380px;
+    }
+
+    .toast {
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.2s ease;
+    }
+
+    .toast-success { background: #065f46; }
+    .toast-warning { background: #b45309; }
+    .toast-error { background: #9f1239; }
+    .toast-info { background: #1e293b; }
+
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(15, 23, 42, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-title {
+      margin: 0 0 8px 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .modal-desc {
+      margin: 0 0 18px 0;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- ==========================================================================
+       HEADER BAR
+       ========================================================================== -->
+  <header class="app-header">
+    <div class="container header-inner">
+      <div class="brand-group">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="16" rx="2"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+            <line x1="9" y1="10" x2="9" y2="20"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">
+            <span>Sắp Xếp Phòng Thi Tốt Nghiệp THPT</span>
+            <span class="offline-badge">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Phương án 2+2 • Chạy 100% Offline
+            </span>
+          </h1>
+          <p class="brand-subtitle">Gom phòng tối đa 24 TS • Ưu tiên trùng môn tự chọn • Hỗ trợ TS tự do 1 môn • Cân bằng phòng cuối • Đánh SBD tự động</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="draft-pill" title="Dữ liệu được tự động lưu cục bộ trên trình duyệt của bạn">
+          <span id="draftStatusDot" class="status-dot"></span>
+          <span id="draftStatusText">Chưa có bản nháp</span>
+        </div>
+        <button id="btnExportProject" type="button" class="btn btn-outline" title="Lưu toàn bộ cấu hình và kết quả phân phòng ra tệp .json">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Xuất Kỳ thi (.json)
+        </button>
+        <label class="btn btn-outline" style="margin:0; cursor:pointer;" title="Mở lại tệp Kỳ thi .json đã lưu">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Mở Kỳ thi
+          <input id="projectInput" type="file" accept=".json" class="hidden" />
+        </label>
+        <button id="btnClearDraft" type="button" class="btn btn-danger-soft" title="Xóa bản nháp hiện tại và làm mới">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          Xóa nháp
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MAIN WORKSPACE
+       ========================================================================== -->
+  <main class="container main-content">
+    <div class="setup-grid">
+      <!-- STEP 1: DATA IMPORT & COLUMN MAPPING -->
+      <section class="card">
+        <div class="card-header">
+          <div class="step-title-wrap">
+            <span class="step-badge">1</span>
+            <h2 class="card-title">Nạp Danh Sách Thí Sinh &amp; Ánh Xạ Cột</h2>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px;">
+            <button id="btnDownloadTemplate" type="button" class="btn btn-outline">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+              Tải file mẫu (.xlsx)
+            </button>
+            <button id="btnLoadSample" type="button" class="btn btn-indigo-soft">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Dữ liệu mẫu (123 TS - có Tự do 1 môn)
+            </button>
+            <button id="btnLoadSampleNoSbd" type="button" class="btn btn-indigo-soft" title="Nạp 123 thí sinh mẫu chưa có SBD để kiểm thử tính năng tự động đánh SBD">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              Dữ liệu mẫu (chưa có SBD)
+            </button>
+          </div>
+        </div>
+
+        <div id="dropZone" class="dropzone" tabindex="0" role="button" aria-label="Tải lên tệp Excel hoặc CSV danh sách thí sinh">
+          <input id="fileInput" type="file" accept=".xlsx,.csv,.txt,.json" class="hidden" />
+          <div class="dropzone-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <p class="dropzone-title">Kéo thả tệp Excel (.xlsx) hoặc CSV vào đây, hoặc nhấp để chọn tệp</p>
+          <p class="dropzone-sub">Tự động nhận diện dòng tiêu đề và ánh xạ 7 cột: SBD, Họ và tên, Ngày sinh, Giới tính, Lớp, Môn tự chọn 1, Môn tự chọn 2</p>
+        </div>
+
+        <div id="mappingSection" class="mapping-box hidden">
+          <div class="mapping-top">
+            <span id="uploadedFileName" class="file-status-tag">Đang dùng: Dữ liệu mẫu</span>
+            <div id="sheetSelectorWrap" class="hidden" style="display:flex; align-items:center; gap:6px;">
+              <label for="sheetSelect" class="form-label" style="margin:0;">Trang tính (Sheet):</label>
+              <select id="sheetSelect" class="form-control" style="width:auto; padding:4px 8px; font-size:12px;"></select>
+            </div>
+          </div>
+
+          <div class="grid-4">
+            <div>
+              <label class="form-label" for="mapSbd">Cột Số báo danh (tùy chọn)</label>
+              <select id="mapSbd" class="form-control map-select"></select>
+            </div>
+            <div>
+              <label class="form-label" for="mapName">Cột Họ và tên (*)</label>
+              <select id="mapName" class="form-control map-select"></select>
+            </div>
+            <div>
+              <label class="form-label" for="mapDob">Cột Ngày sinh</label>
+              <select id="mapDob" class="form-control map-select"></select>
+            </div>
+            <div>
+              <label class="form-label" for="mapGender">Cột Giới tính</label>
+              <select id="mapGender" class="form-control map-select"></select>
+            </div>
+          </div>
+
+          <div class="grid-4" style="margin-top:10px;">
+            <div>
+              <label class="form-label" for="mapClass">Cột Lớp</label>
+              <select id="mapClass" class="form-control map-select"></select>
+            </div>
+            <div>
+              <label class="form-label" for="mapSub1">Cột Môn tự chọn 1 (*)</label>
+              <select id="mapSub1" class="form-control map-select"></select>
+            </div>
+            <div>
+              <label class="form-label" for="mapSub2">Cột Môn tự chọn 2 (để trống nếu TS tự do 1 môn)</label>
+              <select id="mapSub2" class="form-control map-select"></select>
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+              <button id="btnReapplyMap" type="button" class="btn btn-outline" style="width:100%;">
+                Cập nhật ánh xạ cột
+              </button>
+            </div>
+          </div>
+
+          <div id="validationBox" class="validation-box validation-ok"></div>
+        </div>
+
+        <div class="card-footer-note">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>Hỗ trợ cả thí sinh đăng ký đủ 2 môn tự chọn và <strong>thí sinh tự do chỉ thi 1 môn tự chọn</strong> ở Buổi 3 (Ca 1 hoặc Ca 2).</span>
+        </div>
+      </section>
+
+      <!-- STEP 2: COUNCIL & SBD CONFIGURATION -->
+      <div style="display:flex; flex-direction:column; gap:18px;">
+        <section class="card">
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div class="card-header" style="margin-bottom:0;">
+              <div class="step-title-wrap">
+                <span class="step-badge">2</span>
+                <h2 class="card-title">Cấu hình Hội đồng &amp; Biểu mẫu</h2>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div>
+                <label class="form-label" for="maxPerRoom">Sĩ số tối đa mỗi phòng thi</label>
+                <input id="maxPerRoom" type="number" min="4" max="48" value="24" class="form-control font-bold" />
+              </div>
+              <div>
+                <label class="form-label" for="cfgBalanceTailRooms">Cân bằng sĩ số các phòng cuối</label>
+                <select id="cfgBalanceTailRooms" class="form-control">
+                  <option value="auto_smart" selected>Tự động khi phòng cuối &lt; 50% định mức</option>
+                  <option value="always_tail">Luôn san đều sĩ số các phòng cuối</option>
+                  <option value="off">Không cân bằng (Dồn tối đa đến phòng kế cuối)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="accordion-box">
+              <div class="accordion-title">
+                <span>Thông tin tiêu đề in &amp; Xuất Excel</span>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label class="form-label" for="cfgDeptName">Đơn vị chủ quản (Sở / Trường)</label>
+                  <input id="cfgDeptName" type="text" value="SỞ GD & ĐT HẢI PHÒNG" class="form-control" />
+                </div>
+                <div>
+                  <label class="form-label" for="cfgCouncilName">Hội đồng coi thi / Điểm thi</label>
+                  <input id="cfgCouncilName" type="text" placeholder="VD: THPT Bạch Đằng" class="form-control" />
+                </div>
+                <div>
+                  <label class="form-label" for="cfgExamTitle">Tên kỳ thi</label>
+                  <input id="cfgExamTitle" type="text" value="KỲ THI TỐT NGHIỆP THPT NĂM 2026" class="form-control" />
+                </div>
+                <div>
+                  <label class="form-label" for="cfgSessionDate">Khóa ngày / Đợt thi</label>
+                  <input id="cfgSessionDate" type="text" placeholder="VD: Khóa ngày 26/6/2026" class="form-control" />
+                </div>
+                <div>
+                  <label class="form-label" for="cfgChairName">Họ tên Chủ tịch HĐCT</label>
+                  <input id="cfgChairName" type="text" placeholder="VD: Nguyễn Văn A" class="form-control" />
+                </div>
+                <div>
+                  <label class="form-label" for="cfgExamYear">Năm thi (in trên phiếu)</label>
+                  <input id="cfgExamYear" type="text" value="2026" class="form-control" />
+                </div>
+                <div>
+                  <label class="form-label" for="cfgReceiptMode">Chế độ Phiếu thu bài Tự chọn</label>
+                  <select id="cfgReceiptMode" class="form-control">
+                    <option value="merged" selected>Gộp 2 ca (Môn 1 - Môn 2)</option>
+                    <option value="split_shifts">Tách riêng từng ca (Ca 1 &amp; Ca 2)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="cfgSheetLayout">Bố cục Sheet khi xuất Excel</label>
+                  <select id="cfgSheetLayout" class="form-control">
+                    <option value="per_room" selected>Mỗi phòng thi 1 Sheet riêng</option>
+                    <option value="single_sheet">Gộp tất cả phòng trên 1 Sheet</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-top:8px;">
+                <label class="form-label" for="cfgCouncilSortOrder">Thứ tự sắp xếp Danh sách Toàn Hội Đồng (8 cột)</label>
+                <select id="cfgCouncilSortOrder" class="form-control">
+                  <option value="room_seat" selected>Theo Phòng thi &amp; Số thứ tự trong phòng (01 → N)</option>
+                  <option value="sbd">Theo Số báo danh tăng dần</option>
+                  <option value="abc">Theo ABC tiếng Việt toàn hội đồng (Tên → Họ → Đệm)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- SBD Configuration Box -->
+            <div class="accordion-box">
+              <div class="accordion-title">
+                <span>Cấu hình Đánh Số Báo Danh (SBD) tự động</span>
+                <button id="btnApplySbdNow" type="button" class="btn btn-indigo-soft" style="padding:3px 9px; font-size:11.5px;">
+                  Áp dụng đánh SBD ngay
+                </button>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label class="form-label" for="sbdMode">Chế độ xử lý SBD</label>
+                  <select id="sbdMode" class="form-control">
+                    <option value="auto_missing" selected>Tự động đánh SBD nếu file thiếu hoặc trống</option>
+                    <option value="overwrite">Đánh lại toàn bộ SBD (Ghi đè SBD cũ)</option>
+                    <option value="keep">Chỉ giữ nguyên SBD từ file gốc</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="sbdOrderRule">Quy tắc thứ tự đánh SBD</label>
+                  <select id="sbdOrderRule" class="form-control">
+                    <option value="abc" selected>Theo ABC toàn hội đồng (Tên → Họ → Đệm)</option>
+                    <option value="by_room">Theo Phòng thi &amp; STT trong phòng (01 → N)</option>
+                    <option value="by_class">Theo Lớp &amp; ABC tiếng Việt</option>
+                    <option value="original">Giữ nguyên thứ tự danh sách file gốc</option>
+                  </select>
+                </div>
+              </div>
+              <div class="grid-4" style="margin-top:8px;">
+                <div>
+                  <label class="form-label" for="sbdPrefix">Ký hiệu / Tiền tố</label>
+                  <input id="sbdPrefix" type="text" value="02" maxlength="10" class="form-control font-mono" placeholder="VD: 02 hoặc HQ" />
+                </div>
+                <div>
+                  <label class="form-label" for="sbdStart">Số bắt đầu</label>
+                  <input id="sbdStart" type="number" min="0" max="999999" value="1" class="form-control font-mono" />
+                </div>
+                <div>
+                  <label class="form-label" for="sbdDigits">Độ dài phần số</label>
+                  <select id="sbdDigits" class="form-control">
+                    <option value="3">3 chữ số (001)</option>
+                    <option value="4" selected>4 chữ số (0001)</option>
+                    <option value="5">5 chữ số (00001)</option>
+                    <option value="6">6 chữ số (000001)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="sbdSuffix">Hậu tố (tùy chọn)</label>
+                  <input id="sbdSuffix" type="text" value="" maxlength="6" class="form-control font-mono" placeholder="Trống" />
+                </div>
+              </div>
+              <div class="sbd-preview-banner">
+                <span>Mẫu SBD dự kiến: <span id="sbdSampleRange" class="sbd-code">020001 → 020123</span></span>
+                <span id="sbdRuleBadge" style="font-size:11.5px; color:var(--text-muted);">Tự động cấp nếu trống</span>
+              </div>
+            </div>
+
+            <button id="btnRunSchedule" type="button" class="btn btn-primary btn-lg">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Sắp Xếp Phòng Thi &amp; Phân Ca Tối Ưu
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ==========================================================================
+         RESULTS SECTION (SHOWN AFTER SCHEDULING)
+         ========================================================================== -->
+    <section id="resultsSection" class="hidden" style="display:flex; flex-direction:column; gap:18px;">
+      <!-- KPI Summary Row -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div>
+            <p class="kpi-label">Tổng số thí sinh</p>
+            <p id="kpiTotalStudents" class="kpi-value">0</p>
+            <p id="kpiPairsCount" class="kpi-sub">0 tổ hợp môn</p>
+          </div>
+          <div class="kpi-icon" style="background:var(--primary-light); color:var(--primary);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div>
+            <p class="kpi-label">Tổng số phòng thi</p>
+            <p id="kpiTotalRooms" class="kpi-value">0</p>
+            <p id="kpiRoomCapNote" class="kpi-sub">Tối đa 24 HS/phòng</p>
+          </div>
+          <div class="kpi-icon" style="background:var(--emerald-light); color:var(--emerald);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div>
+            <p class="kpi-label">Phòng thuần / Phòng ghép</p>
+            <p class="kpi-value"><span id="kpiPureRooms" style="color:var(--emerald);">0</span> / <span id="kpiMixedRooms" style="color:var(--amber);">0</span></p>
+            <p class="kpi-sub">Phòng 1 tổ hợp / Ghép trùng môn</p>
+          </div>
+          <div class="kpi-icon" style="background:var(--amber-light); color:var(--amber);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div>
+            <p class="kpi-label">Hiệu suất gom túi đề</p>
+            <p id="kpiHomogeneity" class="kpi-value" style="color:var(--violet);">100%</p>
+            <p class="kpi-sub">Tỷ lệ trùng môn cùng ca</p>
+          </div>
+          <div class="kpi-icon" style="background:var(--violet-light); color:var(--violet);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Export Reports Panel -->
+      <div class="export-panel">
+        <div class="export-header">
+          <h3 class="export-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Xuất Hồ Sơ &amp; Biểu Mẫu Excel Chuẩn Định Dạng (Times New Roman • Khổ A4)
+          </h3>
+          <span style="font-size:12px; color:var(--text-muted);">Hỗ trợ xuất cả 3 buổi thi (Ngữ văn, Toán, Tự chọn) &amp; Danh sách toàn hội đồng 8 cột</span>
+        </div>
+        <div class="export-grid">
+          <button id="btnExportCouncilList" type="button" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            DS Toàn Hội Đồng (8 cột)
+          </button>
+          <button id="btnExportPostingList" type="button" class="btn btn-emerald">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            DS Niêm Yết Phòng Thi
+          </button>
+          <button id="btnExportReceiptAll" type="button" class="btn btn-violet-soft">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Trọn Bộ Phiếu Thu Bài (Văn + Toán + Tự chọn)
+          </button>
+          <button id="btnExportReceiptVan" type="button" class="btn btn-sky-soft">
+            Phiếu Thu Bài Ngữ Văn
+          </button>
+          <button id="btnExportReceiptToan" type="button" class="btn btn-sky-soft">
+            Phiếu Thu Bài Toán
+          </button>
+          <button id="btnExportReceiptElective" type="button" class="btn btn-amber-soft">
+            Phiếu Thu Bài Tự Chọn
+          </button>
+          <button id="btnExportSummary" type="button" class="btn btn-emerald-soft">
+            Bảng Tổng Hợp Phân Phòng &amp; Túi Đề
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Workspace Tabs & Views -->
+      <div class="workspace-card">
+        <div class="workspace-bar">
+          <div class="tab-group" role="tablist">
+            <button type="button" class="tab-btn active" data-tab="seats">Sơ đồ phòng thi (24 ghế)</button>
+            <button type="button" class="tab-btn" data-tab="room_list">Danh sách theo phòng</button>
+            <button type="button" class="tab-btn" data-tab="council_list">Danh sách toàn hội đồng (8 cột)</button>
+            <button type="button" class="tab-btn" data-tab="preview">Xem trước &amp; In biểu mẫu A4</button>
+          </div>
+
+          <div class="filter-group">
+            <select id="filterRoom" class="form-control" style="width:auto; min-width:140px;" aria-label="Lọc theo phòng thi">
+              <option value="ALL">Tất cả phòng thi</option>
+            </select>
+            <select id="filterSubject" class="form-control" style="width:auto; min-width:130px;" aria-label="Lọc theo môn tự chọn">
+              <option value="ALL">Tất cả môn</option>
+            </select>
+            <input id="searchInput" type="search" placeholder="Tìm tên, SBD, lớp..." class="form-control" style="width:190px;" />
+          </div>
+        </div>
+
+        <div class="workspace-body">
+          <!-- Tab 1: Seat Map -->
+          <div id="tabSeats"></div>
+
+          <!-- Tab 2: Room List with Manual Transfer -->
+          <div id="tabRoomList" class="hidden"></div>
+
+          <!-- Tab 3: Full Council List (8 Columns) -->
+          <div id="tabCouncilList" class="hidden"></div>
+
+          <!-- Tab 4: A4 Print Preview -->
+          <div id="tabPreview" class="hidden">
+            <div class="preview-toolbar">
+              <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+                <label for="previewFormType" class="form-label" style="margin:0;">Loại biểu mẫu:</label>
+                <select id="previewFormType" class="form-control" style="width:auto;">
+                  <option value="posting">Danh sách niêm yết phòng thi</option>
+                  <option value="receipt_van">Phiếu thu bài - Môn Ngữ văn</option>
+                  <option value="receipt_toan">Phiếu thu bài - Môn Toán</option>
+                  <option value="receipt_elective">Phiếu thu bài - Bài thi Tự chọn</option>
+                </select>
+                <label for="previewRoomSelect" class="form-label" style="margin:0;">Phòng thi:</label>
+                <select id="previewRoomSelect" class="form-control" style="width:auto;"></select>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                <button id="btnPrintCurrentRoom" type="button" class="btn btn-primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  In phòng đang xem (A4)
+                </button>
+                <button id="btnPrintAllRooms" type="button" class="btn btn-emerald">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  In tất cả các phòng (A4)
+                </button>
+              </div>
+            </div>
+            <div id="printArea" class="a4-viewport"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+<footer class="app-footer">
+    <div class="container">
+      (c) by Đỗ Chí Cường - THPT Bạch Đằng - 0986963984
+    </div>
+</footer>
+  <!-- Confirm Clear Draft Modal -->
+  <div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div class="modal-box">
+      <h3 id="confirmModalTitle" class="modal-title">Xác nhận xóa bản nháp?</h3>
+      <p class="modal-desc">Thao tác này sẽ xóa toàn bộ danh sách thí sinh, cấu hình hiện tại và kết quả phân phòng đang lưu trên trình duyệt.</p>
+      <div class="modal-actions">
+        <button id="btnCancelClear" type="button" class="btn btn-outline">Hủy bỏ</button>
+        <button id="btnConfirmClear" type="button" class="btn btn-danger-soft">Xóa bản nháp</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script>
+    /* ==========================================================================
+       MODULE A: GLOBAL APPLICATION STATE & STORAGE CONSTANTS
+       ========================================================================== */
+    const STORAGE_KEY = 'thpt_exam_planner_draft_v3';
+
+    const state = {
+      parsedWorkbook: null, // { sheetNames: string[], sheets: Record<string, any[][]> }
+      uploadedFileName: '',
+      rawRows: [],
+      headerRowIndex: 0,
+      headers: [],
+      colMap: {
+        sbd: -1,
+        name: -1,
+        dob: -1,
+        gender: -1,
+        className: -1,
+        sub1: -1,
+        sub2: -1,
+      },
+      studentsValid: [],
+      studentsInvalid: [],
+      rooms: [],
+      tailBalancedInfo: null,
+      activeTab: 'seats', // 'seats' | 'room_list' | 'council_list' | 'preview'
+      filterRoom: 'ALL',
+      filterSubject: 'ALL',
+      searchQuery: '',
+      lastSavedAt: null,
+    };
+
+    /* ==========================================================================
+       MODULE B: UTILITIES, VIETNAMESE COLLATION, DATE & SUBJECT NORMALIZATION
+       ========================================================================== */
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeXml(str) {
+      if (str === null || str === undefined) return '';
+      // Strip invalid XML 1.0 control characters before escaping
+      const cleaned = String(str).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '');
+      return cleaned
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(6px)';
+        el.style.transition = 'all 0.2s ease';
+        setTimeout(() => el.remove(), 220);
+      }, 3600);
+    }
+
+    /**
+     * Vietnamese exam standard alphabetical comparison:
+     * Given Name (Tên) -> Family Name (Họ) -> Middle Name (Tên đệm)
+     */
+    function splitVietnameseName(fullName) {
+      const clean = String(fullName || '').trim().replace(/\s+/g, ' ');
+      if (!clean) return { first: '', last: '', middle: '', full: '' };
+      const parts = clean.split(' ');
+      if (parts.length === 1) {
+        return { first: parts[0], last: '', middle: '', full: clean };
+      }
+      const first = parts[parts.length - 1];
+      const last = parts[0];
+      const middle = parts.slice(1, -1).join(' ');
+      return { first, last, middle, full: clean };
+    }
+
+    function compareVietnameseNames(nameA, nameB) {
+      const a = splitVietnameseName(nameA);
+      const b = splitVietnameseName(nameB);
+      const opts = { sensitivity: 'base' };
+      const c1 = a.first.localeCompare(b.first, 'vi', opts);
+      if (c1 !== 0) return c1;
+      const c2 = a.last.localeCompare(b.last, 'vi', opts);
+      if (c2 !== 0) return c2;
+      const c3 = a.middle.localeCompare(b.middle, 'vi', opts);
+      if (c3 !== 0) return c3;
+      return a.full.localeCompare(b.full, 'vi', opts);
+    }
+
+    /**
+     * Convert Excel serial date, ISO YYYY-MM-DD, or D/M/YYYY to DD/MM/YYYY
+     */
+    function normalizeDateToDDMMYYYY(raw) {
+      if (raw === null || raw === undefined || raw === '') return '';
+      if (typeof raw === 'number' && Number.isFinite(raw)) {
+        // Excel serial date (1900 date system, accounting for Excel 1900 leap year bug)
+        if (raw > 1000 && raw < 90000) {
+          const utcDays = Math.floor(raw - 25569);
+          const dateObj = new Date(utcDays * 86400 * 1000);
+          if (!Number.isNaN(dateObj.getTime())) {
+            const d = String(dateObj.getUTCDate()).padStart(2, '0');
+            const m = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+            const y = dateObj.getUTCFullYear();
+            return `${d}/${m}/${y}`;
+          }
+        }
+        return String(raw);
+      }
+
+      const str = String(raw).trim();
+      if (!str) return '';
+
+      // Pure numeric string representing Excel serial
+      if (/^\d{5}$/.test(str)) {
+        return normalizeDateToDDMMYYYY(Number(str));
+      }
+
+      // YYYY-MM-DD or YYYY/MM/DD
+      const isoMatch = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
+      if (isoMatch) {
+        return `${isoMatch[3].padStart(2, '0')}/${isoMatch[2].padStart(2, '0')}/${isoMatch[1]}`;
+      }
+
+      // D/M/YYYY or D-M-YYYY or D.M.YYYY
+      const dmyMatch = str.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})$/);
+      if (dmyMatch) {
+        const yr = dmyMatch[3].length === 2 ? `20${dmyMatch[3]}` : dmyMatch[3];
+        return `${dmyMatch[1].padStart(2, '0')}/${dmyMatch[2].padStart(2, '0')}/${yr}`;
+      }
+
+      return str;
+    }
+
+    function normalizeGender(raw) {
+      if (raw === null || raw === undefined) return '';
+      const s = String(raw).trim().toLowerCase();
+      if (!s) return '';
+      if (['nữ', 'nu', 'f', 'female', 'x', '1'].includes(s)) return 'Nữ';
+      if (['nam', 'm', 'male', '0'].includes(s)) return 'Nam';
+      return String(raw).trim();
+    }
+
+    /**
+     * Normalize 2025+ THPT Graduation Elective Subjects & Empty/Absent markers
+     */
+    function normalizeSubject(raw) {
+      if (raw === null || raw === undefined) return '';
+      const s = String(raw).trim().replace(/\s+/g, ' ');
+      if (!s) return '';
+      const lower = s.toLowerCase();
+
+      // Empty / Not registered tokens (common for independent candidates taking 1 elective)
+      if (
+        ['không', 'không thi', 'khong', 'khong thi', 'miễn', 'miễn thi', 'mien', 'trống', 'none', 'null', 'n/a', '-', '--', '0'].includes(
+          lower
+        )
+      ) {
+        return '';
+      }
+
+      // Vật lí -> Lí
+      if (['vật lí', 'vật lý', 'lí', 'lý', 'môn vật lí', 'môn vật lý', 'vl'].includes(lower)) return 'Lí';
+      // Hóa học -> Hóa
+      if (['hóa học', 'hoá học', 'hóa', 'hoá', 'môn hóa học', 'môn hoá học', 'hh'].includes(lower)) return 'Hóa';
+      // Sinh học -> Sinh
+      if (['sinh học', 'sinh', 'môn sinh học', 'sh'].includes(lower)) return 'Sinh';
+      // Lịch sử -> Sử
+      if (['lịch sử', 'sử', 'môn lịch sử', 'ls'].includes(lower)) return 'Sử';
+      // Địa lí -> Địa
+      if (['địa lí', 'địa lý', 'địa', 'môn địa lí', 'môn địa lý', 'đl'].includes(lower)) return 'Địa';
+      // Giáo dục kinh tế và pháp luật -> KTPL
+      if (
+        ['giáo dục kinh tế và pháp luật', 'gdkt&pl', 'gdktpl', 'ktpl', 'kinh tế và pháp luật', 'kinh tế pháp luật', 'gdcd'].includes(lower)
+      ) {
+        return 'KTPL';
+      }
+      // Tin học -> Tin
+      if (['tin học', 'tin', 'môn tin học', 'th'].includes(lower)) return 'Tin';
+      // Công nghệ
+      if (['công nghệ công nghiệp', 'cn công nghiệp', 'cncn'].includes(lower)) return 'CN Công nghiệp';
+      if (['công nghệ nông nghiệp', 'cn nông nghiệp', 'cnnn', 'công nghệ'].includes(lower)) return 'CN Nông nghiệp';
+      // Ngoại ngữ
+      if (['tiếng anh', 'anh', 'ngoại ngữ', 'n1', 'ta', 'môn tiếng anh'].includes(lower)) return 'Anh';
+      if (['tiếng nga', 'nga', 'n2'].includes(lower)) return 'Nga';
+      if (['tiếng pháp', 'pháp', 'n3'].includes(lower)) return 'Pháp';
+      if (['tiếng trung', 'tiếng trung quốc', 'trung', 'n4'].includes(lower)) return 'Trung';
+      if (['tiếng đức', 'đức', 'n5'].includes(lower)) return 'Đức';
+      if (['tiếng nhật', 'nhật', 'n6'].includes(lower)) return 'Nhật';
+      if (['tiếng hàn', 'hàn', 'n7'].includes(lower)) return 'Hàn';
+
+      return s;
+    }
+
+    function getSubjectClass(sub) {
+      const map = {
+        'Lí': 'sub-li',
+        'Hóa': 'sub-hoa',
+        'Sinh': 'sub-sinh',
+        'Sử': 'sub-su',
+        'Địa': 'sub-dia',
+        'KTPL': 'sub-ktpl',
+        'Anh': 'sub-anh',
+        'Tin': 'sub-tin',
+      };
+      return map[sub] || 'sub-default';
+    }
+
+    /* ==========================================================================
+       MODULE C: COUNCIL CONFIG & AUTO SBD NUMBERING ENGINE
+       ========================================================================== */
+    function getCouncilConfig() {
+      const parsedStart = parseInt(document.getElementById('sbdStart').value, 10);
+      return {
+        deptName: document.getElementById('cfgDeptName').value.trim() || 'SỞ GD & ĐT HẢI PHÒNG',
+        councilName: document.getElementById('cfgCouncilName').value.trim() || 'HĐ COI THI: ...........................',
+        examTitle: document.getElementById('cfgExamTitle').value.trim() || 'KỲ THI TỐT NGHIỆP THPT NĂM 2026',
+        sessionDate: document.getElementById('cfgSessionDate').value.trim() || 'Khóa ngày: ............',
+        chairName: document.getElementById('cfgChairName').value.trim(),
+        examYear: document.getElementById('cfgExamYear').value.trim() || '2026',
+        receiptMode: document.getElementById('cfgReceiptMode').value,
+        sheetLayout: document.getElementById('cfgSheetLayout').value,
+        councilSortOrder: document.getElementById('cfgCouncilSortOrder').value,
+        maxPerRoom: Math.max(4, Math.min(48, parseInt(document.getElementById('maxPerRoom').value, 10) || 24)),
+        balanceTailRooms: document.getElementById('cfgBalanceTailRooms').value || 'auto_smart',
+        sbdMode: document.getElementById('sbdMode').value,
+        sbdOrderRule: document.getElementById('sbdOrderRule').value,
+        sbdPrefix: document.getElementById('sbdPrefix').value.trim(),
+        sbdStart: Number.isFinite(parsedStart) && parsedStart >= 0 ? parsedStart : 1,
+        sbdDigits: Math.max(3, Math.min(8, parseInt(document.getElementById('sbdDigits').value, 10) || 4)),
+        sbdSuffix: document.getElementById('sbdSuffix').value.trim(),
+      };
+    }
+
+    function applyConfigToDOM(cfg) {
+      if (!cfg) return;
+      if (cfg.deptName !== undefined) document.getElementById('cfgDeptName').value = cfg.deptName;
+      if (cfg.councilName !== undefined) document.getElementById('cfgCouncilName').value = cfg.councilName;
+      if (cfg.examTitle !== undefined) document.getElementById('cfgExamTitle').value = cfg.examTitle;
+      if (cfg.sessionDate !== undefined) document.getElementById('cfgSessionDate').value = cfg.sessionDate;
+      if (cfg.chairName !== undefined) document.getElementById('cfgChairName').value = cfg.chairName;
+      if (cfg.examYear !== undefined) document.getElementById('cfgExamYear').value = cfg.examYear;
+      if (cfg.receiptMode !== undefined) document.getElementById('cfgReceiptMode').value = cfg.receiptMode;
+      if (cfg.sheetLayout !== undefined) document.getElementById('cfgSheetLayout').value = cfg.sheetLayout;
+      if (cfg.councilSortOrder !== undefined) document.getElementById('cfgCouncilSortOrder').value = cfg.councilSortOrder;
+      if (cfg.maxPerRoom !== undefined) document.getElementById('maxPerRoom').value = cfg.maxPerRoom;
+      if (cfg.balanceTailRooms !== undefined) document.getElementById('cfgBalanceTailRooms').value = cfg.balanceTailRooms;
+      if (cfg.sbdMode !== undefined) document.getElementById('sbdMode').value = cfg.sbdMode;
+      if (cfg.sbdOrderRule !== undefined) document.getElementById('sbdOrderRule').value = cfg.sbdOrderRule;
+      if (cfg.sbdPrefix !== undefined) document.getElementById('sbdPrefix').value = cfg.sbdPrefix;
+      if (cfg.sbdStart !== undefined) document.getElementById('sbdStart').value = cfg.sbdStart;
+      if (cfg.sbdDigits !== undefined) document.getElementById('sbdDigits').value = cfg.sbdDigits;
+      if (cfg.sbdSuffix !== undefined) document.getElementById('sbdSuffix').value = cfg.sbdSuffix;
+      updateSbdLivePreview();
+    }
+
+    function formatSingleSbd(seqNum, cfg) {
+      const numPart = String(seqNum).padStart(cfg.sbdDigits, '0');
+      return `${cfg.sbdPrefix}${numPart}${cfg.sbdSuffix}`;
+    }
+
+    function updateSbdLivePreview() {
+      const cfg = getCouncilConfig();
+      const total = Math.max(1, state.studentsValid.length || 123);
+      const firstSbd = formatSingleSbd(cfg.sbdStart, cfg);
+      const lastSbd = formatSingleSbd(cfg.sbdStart + total - 1, cfg);
+      const rangeEl = document.getElementById('sbdSampleRange');
+      const ruleEl = document.getElementById('sbdRuleBadge');
+      if (rangeEl) rangeEl.textContent = `${firstSbd} → ${lastSbd}`;
+      if (ruleEl) {
+        const modeLabels = {
+          auto_missing: 'Tự động cấp nếu trống',
+          overwrite: 'Ghi đè toàn bộ SBD',
+          keep: 'Giữ nguyên SBD file gốc',
+        };
+        ruleEl.textContent = modeLabels[cfg.sbdMode] || '';
+      }
+    }
+
+    /**
+     * Assign SBDs cleanly according to sbdMode and sbdOrderRule,
+     * and synchronize across both state.studentsValid and state.rooms.
+     */
+    function applySbdNumberingToCollection(studentsList, roomsList) {
+      if (!Array.isArray(studentsList) || studentsList.length === 0) return 0;
+      const cfg = getCouncilConfig();
+
+      if (cfg.sbdMode === 'keep') {
+        for (const st of studentsList) {
+          st.sbd = st.originalSbd || '';
+        }
+      } else {
+        let ordered = [];
+        if (cfg.sbdOrderRule === 'by_room' && Array.isArray(roomsList) && roomsList.length > 0) {
+          for (const r of roomsList) {
+            ordered.push(...r.students);
+          }
+        } else if (cfg.sbdOrderRule === 'abc') {
+          ordered = [...studentsList].sort((a, b) => compareVietnameseNames(a.fullName, b.fullName));
+        } else if (cfg.sbdOrderRule === 'by_class') {
+          ordered = [...studentsList].sort((a, b) => {
+            const cCmp = (a.className || '').localeCompare(b.className || '', 'vi', { numeric: true });
+            return cCmp !== 0 ? cCmp : compareVietnameseNames(a.fullName, b.fullName);
+          });
+        } else {
+          ordered = [...studentsList].sort((a, b) => (a.origIndex || 0) - (b.origIndex || 0));
+        }
+
+        let seq = cfg.sbdStart;
+        const assignedMap = new Map();
+        for (const st of ordered) {
+          if (cfg.sbdMode === 'overwrite' || !st.originalSbd) {
+            assignedMap.set(st.id, formatSingleSbd(seq++, cfg));
+          } else {
+            assignedMap.set(st.id, st.originalSbd);
+          }
+        }
+
+        for (const st of studentsList) {
+          if (assignedMap.has(st.id)) {
+            st.sbd = assignedMap.get(st.id);
+          }
+        }
+      }
+
+      // Synchronize SBDs into room student objects
+      const masterSbdMap = new Map(studentsList.map((s) => [s.id, s.sbd]));
+      if (Array.isArray(roomsList)) {
+        for (const r of roomsList) {
+          for (const rst of r.students) {
+            if (masterSbdMap.has(rst.id)) {
+              rst.sbd = masterSbdMap.get(rst.id);
+            }
+          }
+        }
+      }
+      return studentsList.filter((s) => Boolean(s.sbd)).length;
+    }
+
+    /* ==========================================================================
+       MODULE D: 100% OFFLINE ZIP / DEFLATE & EXCEL (.XLSX / .CSV) READER
+       ========================================================================== */
+    function colLettersToIndex(letters) {
+      let col = 0;
+      const up = letters.toUpperCase();
+      for (let i = 0; i < up.length; i++) {
+        col = col * 26 + (up.charCodeAt(i) - 64);
+      }
+      return col - 1;
+    }
+
+    function decodeXmlEntities(text) {
+      if (!text) return '';
+      return text
+        .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+        .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&');
+    }
+
+    /**
+     * Pure JavaScript RFC 1951 Deflate-Raw decompressor (fallback when DecompressionStream is unavailable)
+     */
+    function inflateRawJS(compressed) {
+      let pos = 0;
+      let bitBuf = 0;
+      let bitCount = 0;
+      const out = [];
+
+      function readBits(n) {
+        while (bitCount < n) {
+          if (pos >= compressed.length) throw new Error('Dữ liệu nén Deflate bị cắt cụt.');
+          bitBuf |= compressed[pos++] << bitCount;
+          bitCount += 8;
+        }
+        const val = bitBuf & ((1 << n) - 1);
+        bitBuf >>>= n;
+        bitCount -= n;
+        return val;
+      }
+
+      function buildHuffmanTable(lengths) {
+        const maxLen = Math.max(...lengths, 0);
+        if (maxLen === 0) return { maxLen: 0, table: new Map() };
+        const blCount = new Array(maxLen + 1).fill(0);
+        for (const len of lengths) {
+          if (len > 0) blCount[len]++;
+        }
+        let code = 0;
+        const nextCode = new Array(maxLen + 1).fill(0);
+        for (let bits = 1; bits <= maxLen; bits++) {
+          code = (code + blCount[bits - 1]) << 1;
+          nextCode[bits] = code;
+        }
+        const table = new Map();
+        for (let sym = 0; sym < lengths.length; sym++) {
+          const len = lengths[sym];
+          if (len > 0) {
+            const c = nextCode[len]++;
+            // Reverse bits for LSB-first stream reading
+            let rev = 0;
+            for (let b = 0; b < len; b++) {
+              rev = (rev << 1) | ((c >>> b) & 1);
+            }
+            table.set((len << 16) | rev, sym);
+          }
+        }
+        return { maxLen, table };
+      }
+
+      function decodeSymbol(huff) {
+        let code = 0;
+        for (let len = 1; len <= huff.maxLen; len++) {
+          code |= readBits(1) << (len - 1);
+          const sym = huff.table.get((len << 16) | code);
+          if (sym !== undefined) return sym;
+        }
+        throw new Error('Mã Huffman không hợp lệ trong luồng nén.');
+      }
+
+      const lenBase = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258];
+      const lenExtra = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0];
+      const distBase = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577];
+      const distExtra = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13];
+      const clOrder = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
+
+      let bfinal = 0;
+      while (!bfinal) {
+        bfinal = readBits(1);
+        const btype = readBits(2);
+
+        if (btype === 0) {
+          // Return over-read whole bytes back to stream before byte-aligned uncompressed block
+          pos -= bitCount >>> 3;
+          bitBuf = 0;
+          bitCount = 0;
+          if (pos + 4 > compressed.length) throw new Error('Lỗi khối dữ liệu nén ZIP (BTYPE=0).');
+          const len = compressed[pos] | (compressed[pos + 1] << 8);
+          const nlen = compressed[pos + 2] | (compressed[pos + 3] << 8);
+          if ((len ^ 0xffff) !== nlen) throw new Error('Lỗi kiểm tra độ dài khối không nén ZIP.');
+          pos += 4;
+          if (pos + len > compressed.length) throw new Error('Khối dữ liệu ZIP vượt quá kích thước tệp.');
+          for (let i = 0; i < len; i++) out.push(compressed[pos++]);
+        } else if (btype === 1 || btype === 2) {
+          let litHuff;
+          let distHuff;
+
+          if (btype === 1) {
+            const litLens = new Array(288);
+            for (let i = 0; i <= 143; i++) litLens[i] = 8;
+            for (let i = 144; i <= 255; i++) litLens[i] = 9;
+            for (let i = 256; i <= 279; i++) litLens[i] = 7;
+            for (let i = 280; i <= 287; i++) litLens[i] = 8;
+            litHuff = buildHuffmanTable(litLens);
+            distHuff = buildHuffmanTable(new Array(32).fill(5));
+          } else {
+            const hlit = readBits(5) + 257;
+            const hdist = readBits(5) + 1;
+            const hclen = readBits(4) + 4;
+            const clLens = new Array(19).fill(0);
+            for (let i = 0; i < hclen; i++) {
+              clLens[clOrder[i]] = readBits(3);
+            }
+            const clHuff = buildHuffmanTable(clLens);
+            const totalCodes = hlit + hdist;
+            const allLens = [];
+            while (allLens.length < totalCodes) {
+              const sym = decodeSymbol(clHuff);
+              if (sym <= 15) {
+                allLens.push(sym);
+              } else if (sym === 16) {
+                const rep = readBits(2) + 3;
+                const prev = allLens[allLens.length - 1] || 0;
+                for (let r = 0; r < rep; r++) allLens.push(prev);
+              } else if (sym === 17) {
+                const rep = readBits(3) + 3;
+                for (let r = 0; r < rep; r++) allLens.push(0);
+              } else if (sym === 18) {
+                const rep = readBits(7) + 11;
+                for (let r = 0; r < rep; r++) allLens.push(0);
+              }
+            }
+            litHuff = buildHuffmanTable(allLens.slice(0, hlit));
+            distHuff = buildHuffmanTable(allLens.slice(hlit));
+          }
+
+          while (true) {
+            const sym = decodeSymbol(litHuff);
+            if (sym < 256) {
+              out.push(sym);
+            } else if (sym === 256) {
+              break;
+            } else {
+              const lIdx = sym - 257;
+              const length = lenBase[lIdx] + (lenExtra[lIdx] ? readBits(lenExtra[lIdx]) : 0);
+              const dSym = decodeSymbol(distHuff);
+              const dist = distBase[dSym] + (distExtra[dSym] ? readBits(distExtra[dSym]) : 0);
+              for (let k = 0; k < length; k++) {
+                out.push(out[out.length - dist]);
+              }
+            }
+          }
+        } else {
+          throw new Error('Loại khối nén Deflate không được hỗ trợ.');
+        }
+      }
+
+      return new Uint8Array(out);
+    }
+
+    async function inflateDeflateRaw(compressed) {
+      if (typeof DecompressionStream !== 'undefined') {
+        try {
+          const ds = new DecompressionStream('deflate-raw');
+          const writer = ds.writable.getWriter();
+          writer.write(compressed);
+          writer.close();
+          const buf = await new Response(ds.readable).arrayBuffer();
+          return new Uint8Array(buf);
+        } catch (_) {
+          // Fallback to pure JS Inflate
+        }
+      }
+      return inflateRawJS(compressed);
+    }
+
+    async function extractZipEntries(arrayBuffer) {
+      const bytes = new Uint8Array(arrayBuffer);
+      const view = new DataView(arrayBuffer);
+      const decoder = new TextDecoder('utf-8');
+
+      // Locate End of Central Directory (EOCD: 0x06054b50)
+      let eocdOffset = -1;
+      const minScan = Math.max(0, bytes.length - 65557);
+      for (let i = bytes.length - 22; i >= minScan; i--) {
+        if (view.getUint32(i, true) === 0x06054b50) {
+          eocdOffset = i;
+          break;
+        }
+      }
+      if (eocdOffset === -1) {
+        throw new Error('Tệp không đúng định dạng nén .xlsx (không tìm thấy cấu trúc ZIP).');
+      }
+
+      const totalEntries = view.getUint16(eocdOffset + 10, true);
+      const cdOffset = view.getUint32(eocdOffset + 16, true);
+      if (cdOffset >= bytes.length) {
+        throw new Error('Cấu trúc thư mục trung tâm của tệp .xlsx bị lỗi.');
+      }
+
+      const files = new Map();
+      let ptr = cdOffset;
+
+      for (let e = 0; e < totalEntries && ptr + 46 <= bytes.length; e++) {
+        if (view.getUint32(ptr, true) !== 0x02014b50) break;
+
+        const method = view.getUint16(ptr + 10, true);
+        const compSize = view.getUint32(ptr + 20, true);
+        const nameLen = view.getUint16(ptr + 28, true);
+        const extraLen = view.getUint16(ptr + 30, true);
+        const commentLen = view.getUint16(ptr + 32, true);
+        const localHeaderOffset = view.getUint32(ptr + 42, true);
+
+        const fileName = decoder.decode(bytes.subarray(ptr + 46, ptr + 46 + nameLen));
+        ptr += 46 + nameLen + extraLen + commentLen;
+
+        if (fileName.endsWith('/')) continue;
+        if (localHeaderOffset + 30 > bytes.length) continue;
+        if (view.getUint32(localHeaderOffset, true) !== 0x04034b50) continue;
+
+        const localNameLen = view.getUint16(localHeaderOffset + 26, true);
+        const localExtraLen = view.getUint16(localHeaderOffset + 28, true);
+        const dataStart = localHeaderOffset + 30 + localNameLen + localExtraLen;
+        const dataEnd = dataStart + compSize;
+        if (dataEnd > bytes.length) continue;
+
+        const slice = bytes.subarray(dataStart, dataEnd);
+        if (method === 0) {
+          files.set(fileName, slice);
+        } else if (method === 8) {
+          const inflated = await inflateDeflateRaw(slice);
+          files.set(fileName, inflated);
+        }
+      }
+
+      return files;
+    }
+
+    function parseSharedStringsXml(xmlText) {
+      const list = [];
+      const siRegex = /<(?:[a-zA-Z0-9_]+:)?si\b[^>]*>([\s\S]*?)<\/(?:[a-zA-Z0-9_]+:)?si>/g;
+      let siMatch;
+      while ((siMatch = siRegex.exec(xmlText)) !== null) {
+        // Strip phonetic ruby runs <rPh>...</rPh> so they don't pollute strings
+        const cleanSi = siMatch[1].replace(/<(?:[a-zA-Z0-9_]+:)?rPh\b[^>]*>[\s\S]*?<\/(?:[a-zA-Z0-9_]+:)?rPh>/g, '');
+        const tRegex = /<(?:[a-zA-Z0-9_]+:)?t\b[^>]*>([\s\S]*?)<\/(?:[a-zA-Z0-9_]+:)?t>/g;
+        let tMatch;
+        let acc = '';
+        while ((tMatch = tRegex.exec(cleanSi)) !== null) {
+          acc += decodeXmlEntities(tMatch[1]);
+        }
+        list.push(acc);
+      }
+      return list;
+    }
+
+    function parseSheetXmlToMatrix(xmlText, sharedStrings) {
+      const rows = [];
+      const rowRegex = /<(?:[a-zA-Z0-9_]+:)?row\b[^>]*>([\s\S]*?)<\/(?:[a-zA-Z0-9_]+:)?row>/g;
+      // Handle both self-closing <c r="B1"/> and normal <c r="A1" ...>...</c> cells cleanly
+      const cellRegex = /<(?:[a-zA-Z0-9_]+:)?c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/(?:[a-zA-Z0-9_]+:)?c>)/g;
+
+      let rowMatch;
+      while ((rowMatch = rowRegex.exec(xmlText)) !== null) {
+        const rowContent = rowMatch[1];
+        const rowArr = [];
+        let fallbackCol = 0;
+
+        cellRegex.lastIndex = 0;
+        let cellMatch;
+        while ((cellMatch = cellRegex.exec(rowContent)) !== null) {
+          const attrs = cellMatch[1] || '';
+          const inner = cellMatch[2] || '';
+
+          const rAttr = attrs.match(/\br\s*=\s*["']([A-Za-z]+)\d+["']/);
+          const colIdx = rAttr ? colLettersToIndex(rAttr[1]) : fallbackCol;
+          fallbackCol = colIdx + 1;
+
+          if (!inner) {
+            rowArr[colIdx] = '';
+            continue;
+          }
+
+          const tAttr = attrs.match(/\bt\s*=\s*["']([^"']+)["']/);
+          const cellType = tAttr ? tAttr[1] : '';
+
+          let val = '';
+          if (cellType === 'inlineStr' || cellType === 'str') {
+            const tTags = inner.match(/<(?:[a-zA-Z0-9_]+:)?t\b[^>]*>([\s\S]*?)<\/(?:[a-zA-Z0-9_]+:)?t>/g);
+            if (tTags) {
+              val = tTags
+                .map((tag) => decodeXmlEntities(tag.replace(/<[^>]+>/g, '')))
+                .join('');
+            } else {
+              const vTag = inner.match(/<(?:[a-zA-Z0-9_]+:)?v\b[^>]*>([\s\S]*?)<\/(?:[a-zA-Z0-9_]+:)?v>/);
+              val = vTag ? decodeXmlEntities(vTag[1]) : '';
+            }
+          } else {
+            const vTag = inner.match(/<(?:[a-zA-Z0-9_]+:)?v\b[^>]*>([\s\S]*?)<\/(?:[a-zA-Z0-9_]+:)?v>/);
+            const rawV = vTag ? vTag[1].trim() : '';
+            if (cellType === 's') {
+              const idx = parseInt(rawV, 10);
+              val = Number.isFinite(idx) && sharedStrings[idx] !== undefined ? sharedStrings[idx] : '';
+            } else if (cellType === 'b') {
+              val = rawV === '1' ? 'TRUE' : 'FALSE';
+            } else if (rawV !== '') {
+              const num = Number(rawV);
+              val = Number.isFinite(num) ? num : decodeXmlEntities(rawV);
+            }
+          }
+
+          rowArr[colIdx] = val;
+        }
+
+        // Fill sparse holes with empty strings
+        for (let c = 0; c < rowArr.length; c++) {
+          if (rowArr[c] === undefined) rowArr[c] = '';
+        }
+        rows.push(rowArr);
+      }
+      return rows;
+    }
+
+    async function readXlsxWorkbook(arrayBuffer) {
+      const files = await extractZipEntries(arrayBuffer);
+      const decoder = new TextDecoder('utf-8');
+
+      // Find sharedStrings.xml (case-insensitive)
+      let sharedStrings = [];
+      for (const [k, v] of files.entries()) {
+        if (k.toLowerCase() === 'xl/sharedstrings.xml') {
+          sharedStrings = parseSharedStringsXml(decoder.decode(v));
+          break;
+        }
+      }
+
+      // Map sheet names from workbook.xml + workbook.xml.rels
+      const sheetNameToTarget = new Map();
+      let workbookXml = '';
+      let relsXml = '';
+      for (const [k, v] of files.entries()) {
+        const low = k.toLowerCase();
+        if (low === 'xl/workbook.xml') workbookXml = decoder.decode(v);
+        if (low === 'xl/_rels/workbook.xml.rels') relsXml = decoder.decode(v);
+      }
+
+      const relMap = new Map();
+      if (relsXml) {
+        const relRegex = /<Relationship\b[^>]*>/g;
+        let rm;
+        while ((rm = relRegex.exec(relsXml)) !== null) {
+          const tag = rm[0];
+          const idM = tag.match(/\bId\s*=\s*["']([^"']+)["']/);
+          const targetM = tag.match(/\bTarget\s*=\s*["']([^"']+)["']/);
+          if (idM && targetM) {
+            let target = targetM[1].replace(/^\/+/, '');
+            if (!target.toLowerCase().startsWith('xl/')) target = `xl/${target}`;
+            relMap.set(idM[1], target);
+          }
+        }
+      }
+
+      const orderedSheets = [];
+      if (workbookXml) {
+        const sheetRegex = /<(?:[a-zA-Z0-9_]+:)?sheet\b[^>]*>/g;
+        let sm;
+        while ((sm = sheetRegex.exec(workbookXml)) !== null) {
+          const tag = sm[0];
+          const nameM = tag.match(/\bname\s*=\s*["']([^"']+)["']/);
+          const ridM = tag.match(/\b(?:r:)?id\s*=\s*["']([^"']+)["']/);
+          if (nameM && ridM && relMap.has(ridM[1])) {
+            orderedSheets.push({
+              name: decodeXmlEntities(nameM[1]),
+              path: relMap.get(ridM[1]),
+            });
+          }
+        }
+      }
+
+      // Fallback if workbook.xml wasn't matched
+      if (orderedSheets.length === 0) {
+        const wsPaths = Array.from(files.keys())
+          .filter((k) => /^xl\/worksheets\/sheet\d+\.xml$/i.test(k))
+          .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+        wsPaths.forEach((p, idx) => {
+          orderedSheets.push({ name: `Sheet${idx + 1}`, path: p });
+        });
+      }
+
+      const sheets = {};
+      const sheetNames = [];
+      for (const sh of orderedSheets) {
+        let contentBytes = files.get(sh.path);
+        if (!contentBytes) {
+          const targetLow = sh.path.toLowerCase();
+          for (const [k, v] of files.entries()) {
+            if (k.toLowerCase() === targetLow) {
+              contentBytes = v;
+              break;
+            }
+          }
+        }
+        if (contentBytes) {
+          const matrix = parseSheetXmlToMatrix(decoder.decode(contentBytes), sharedStrings);
+          sheetNames.push(sh.name);
+          sheets[sh.name] = matrix;
+        }
+      }
+
+      if (sheetNames.length === 0) {
+        throw new Error('Không tìm thấy dữ liệu trang tính (Worksheet) hợp lệ trong tệp .xlsx.');
+      }
+
+      return { sheetNames, sheets };
+    }
+
+    function parseCsvText(rawText) {
+      const text = rawText.replace(/^\uFEFF/, '');
+      const firstLine = text.split(/\r?\n/)[0] || '';
+      const semiCount = (firstLine.match(/;/g) || []).length;
+      const commaCount = (firstLine.match(/,/g) || []).length;
+      const tabCount = (firstLine.match(/\t/g) || []).length;
+      const delimiter = tabCount > commaCount && tabCount >= semiCount ? '\t' : semiCount > commaCount ? ';' : ',';
+
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+        if (inQuotes) {
+          if (ch === '"' && next === '"') {
+            cell += '"';
+            i++;
+          } else if (ch === '"') {
+            inQuotes = false;
+          } else {
+            cell += ch;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === delimiter) {
+            row.push(cell.trim());
+            cell = '';
+          } else if (ch === '\r' && next === '\n') {
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = '';
+            i++;
+          } else if (ch === '\n' || ch === '\r') {
+            row.push(cell.trim());
+            rows.push(row);
+            row = [];
+            cell = '';
+          } else {
+            cell += ch;
+          }
+        }
+      }
+      if (cell.length > 0 || row.length > 0) {
+        row.push(cell.trim());
+        rows.push(row);
+      }
+      return rows.filter((r) => r.some((c) => c !== ''));
+    }
+
+    /* ==========================================================================
+       MODULE E: SAMPLE DATA (123 STUDENTS INCL. 1-ELECTIVE INDEPENDENT) & MAPPING
+       ========================================================================== */
+    function generateSampleStudents123(withoutSbd = false) {
+      const hoList = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Huỳnh', 'Phan', 'Vũ', 'Võ', 'Đặng', 'Bùi', 'Đỗ', 'Hồ', 'Ngô', 'Dương'];
+      const demNam = ['Văn', 'Minh', 'Quốc', 'Đức', 'Anh', 'Gia', 'Tuấn', 'Hoàng', 'Hữu', 'Thành'];
+      const tenNam = ['An', 'Bảo', 'Cường', 'Dũng', 'Đạt', 'Hải', 'Hiếu', 'Hùng', 'Huy', 'Khang', 'Khánh', 'Khoa', 'Lâm', 'Long', 'Minh', 'Nam', 'Nghĩa', 'Phong', 'Phúc', 'Quân', 'Sơn', 'Thắng', 'Thịnh', 'Trung', 'Tú', 'Vinh'];
+      const demNu = ['Thị', 'Ngọc', 'Thu', 'Phương', 'Thanh', 'Minh', 'Khánh', 'Bảo', 'Quỳnh', 'Lan'];
+      const tenNu = ['Anh', 'Châu', 'Chi', 'Diệp', 'Dung', 'Giang', 'Hà', 'Hân', 'Hoa', 'Hương', 'Lan', 'Linh', 'Ly', 'Mai', 'My', 'Nga', 'Ngân', 'Nhi', 'Nhung', 'Oanh', 'Phương', 'Quyên', 'Tâm', 'Thảo', 'Trang', 'Trinh', 'Uyên', 'Vân', 'Vy', 'Yến'];
+
+      // 120 regular 2-elective students + 3 independent 1-elective students = 123 total
+      // Demonstrates both 1-elective independent candidates AND automatic tail-room balancing (4x24 + 14 + 13)
+      const cohorts = [
+        { classPrefix: '12A1', sub1: 'Lí', sub2: 'Hóa', count: 34 },
+        { classPrefix: '12A2', sub1: 'Lí', sub2: 'Anh', count: 30 },
+        { classPrefix: '12A3', sub1: 'Sử', sub2: 'Địa', count: 31 },
+        { classPrefix: '12A4', sub1: 'Hóa', sub2: 'Sinh', count: 8 },
+        { classPrefix: '12A5', sub1: 'Sử', sub2: 'KTPL', count: 7 },
+        { classPrefix: '12A6', sub1: 'Địa', sub2: 'KTPL', count: 6 },
+        { classPrefix: '12A7', sub1: 'Tin', sub2: 'Anh', count: 4 },
+        { classPrefix: 'Tự do', sub1: 'Hóa', sub2: '', count: 2 },
+        { classPrefix: 'Tự do', sub1: '', sub2: 'Anh', count: 1 },
+      ];
+
+      const rows = [];
+      let idx = 1;
+      for (const cohort of cohorts) {
+        for (let i = 0; i < cohort.count; i++) {
+          const isFemale = idx % 2 === 0;
+          const ho = hoList[(idx * 7 + i) % hoList.length];
+          const dem = isFemale ? demNu[(idx * 3 + i) % demNu.length] : demNam[(idx * 5 + i) % demNam.length];
+          const ten = isFemale ? tenNu[(idx * 11 + i * 3) % tenNu.length] : tenNam[(idx * 13 + i * 2) % tenNam.length];
+
+          const isSingle = !cohort.sub1 || !cohort.sub2;
+          const day = String(((idx * 7 + i * 3) % 28) + 1).padStart(2, '0');
+          const month = String(((idx * 5 + i) % 12) + 1).padStart(2, '0');
+          const dob = `${day}/${month}/${isSingle ? '2007' : '2008'}`;
+          const gender = isFemale ? 'Nữ' : 'Nam';
+          const swap = !isSingle && (idx + i) % 3 === 0;
+
+          rows.push({
+            sbd: withoutSbd ? '' : `26${String(idx).padStart(4, '0')}`,
+            fullName: `${ho} ${dem} ${ten}`,
+            dob,
+            gender,
+            className: cohort.classPrefix,
+            sub1: swap ? cohort.sub2 : cohort.sub1,
+            sub2: swap ? cohort.sub1 : cohort.sub2,
+          });
+          idx++;
+        }
+      }
+      return rows;
+    }
+
+    function detectHeaderRowAndColumns(matrix) {
+      let bestRowIdx = 0;
+      let bestScore = -1;
+
+      const scanLimit = Math.min(matrix.length, 15);
+      for (let r = 0; r < scanLimit; r++) {
+        const row = matrix[r] || [];
+        let score = 0;
+        for (const cell of row) {
+          const low = String(cell || '').trim().toLowerCase();
+          if (!low) continue;
+          if (low.includes('họ') || low.includes('tên') || low.includes('ho ten')) score += 4;
+          if (low.includes('sbd') || low.includes('báo danh')) score += 3;
+          if (low.includes('ngày sinh') || low.includes('ngay sinh')) score += 3;
+          if (low.includes('giới') || low.includes('gioi')) score += 2;
+          if (low.includes('lớp') || low.includes('lop')) score += 2;
+          if (low.includes('môn') || low.includes('mon') || low.includes('tự chọn')) score += 3;
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          bestRowIdx = r;
+        }
+      }
+
+      const headerRow = (matrix[bestRowIdx] || []).map((c, idx) => {
+        const txt = String(c || '').trim();
+        return txt || `Cột ${idx + 1}`;
+      });
+
+      const colMap = { sbd: -1, name: -1, dob: -1, gender: -1, className: -1, sub1: -1, sub2: -1 };
+      const subCandidates = [];
+
+      headerRow.forEach((h, idx) => {
+        const low = h.toLowerCase();
+        if (colMap.sbd === -1 && (low.includes('sbd') || low.includes('báo danh') || low.includes('bao danh'))) {
+          colMap.sbd = idx;
+        } else if (colMap.name === -1 && (low.includes('họ và tên') || low.includes('họ tên') || low.includes('ho ten') || low === 'tên')) {
+          colMap.name = idx;
+        } else if (colMap.dob === -1 && (low.includes('ngày sinh') || low.includes('ngay sinh') || low.includes('năm sinh'))) {
+          colMap.dob = idx;
+        } else if (colMap.gender === -1 && (low.includes('giới') || low.includes('gioi') || low === 'nữ')) {
+          colMap.gender = idx;
+        } else if (colMap.className === -1 && (low === 'lớp' || low === 'lop' || low.includes('tên lớp'))) {
+          colMap.className = idx;
+        } else if (low.includes('môn') || low.includes('mon') || low.includes('tự chọn') || low.includes('tu chon') || low.includes('đăng ký')) {
+          subCandidates.push(idx);
+        }
+      });
+
+      if (subCandidates.length >= 1) colMap.sub1 = subCandidates[0];
+      if (subCandidates.length >= 2) colMap.sub2 = subCandidates[1];
+
+      // Heuristic fallback if headers were non-standard
+      if (colMap.name === -1 && headerRow.length >= 3) {
+        colMap.name = headerRow.length >= 6 ? 2 : 1;
+      }
+      if (colMap.sub1 === -1 && headerRow.length >= 2) {
+        colMap.sub1 = Math.max(0, headerRow.length - 2);
+      }
+      if (colMap.sub2 === -1 && headerRow.length >= 2) {
+        colMap.sub2 = Math.max(0, headerRow.length - 1);
+      }
+
+      return { headerRowIndex: bestRowIdx, headers: headerRow, colMap };
+    }
+
+    function populateMappingSelects() {
+      const mappingSec = document.getElementById('mappingSection');
+      mappingSec.classList.remove('hidden');
+
+      const selects = [
+        { id: 'mapSbd', key: 'sbd', optional: true },
+        { id: 'mapName', key: 'name', optional: false },
+        { id: 'mapDob', key: 'dob', optional: true },
+        { id: 'mapGender', key: 'gender', optional: true },
+        { id: 'mapClass', key: 'className', optional: true },
+        { id: 'mapSub1', key: 'sub1', optional: false },
+        { id: 'mapSub2', key: 'sub2', optional: true },
+      ];
+
+      for (const item of selects) {
+        const sel = document.getElementById(item.id);
+        if (!sel) continue;
+        let opts = item.optional ? `<option value="-1">-- Không dùng / Tự động --</option>` : '';
+        state.headers.forEach((h, idx) => {
+          opts += `<option value="${idx}">Cột ${idx + 1}: ${escapeHtml(h)}</option>`;
+        });
+        sel.innerHTML = opts;
+        const val = state.colMap[item.key];
+        sel.value = val !== undefined && val >= 0 && val < state.headers.length ? String(val) : '-1';
+      }
+    }
+
+    function readMappingFromUI() {
+      state.colMap = {
+        sbd: parseInt(document.getElementById('mapSbd').value, 10),
+        name: parseInt(document.getElementById('mapName').value, 10),
+        dob: parseInt(document.getElementById('mapDob').value, 10),
+        gender: parseInt(document.getElementById('mapGender').value, 10),
+        className: parseInt(document.getElementById('mapClass').value, 10),
+        sub1: parseInt(document.getElementById('mapSub1').value, 10),
+        sub2: parseInt(document.getElementById('mapSub2').value, 10),
+      };
+    }
+
+    function applyColumnMapping() {
+      const valid = [];
+      const invalid = [];
+
+      for (let r = state.headerRowIndex + 1; r < state.rawRows.length; r++) {
+        const row = state.rawRows[r] || [];
+        // Skip completely blank lines
+        if (!row.some((c) => String(c || '').trim() !== '')) continue;
+
+        const rawSbd = state.colMap.sbd >= 0 ? String(row[state.colMap.sbd] || '').trim() : '';
+        const fullName = state.colMap.name >= 0 ? String(row[state.colMap.name] || '').trim().replace(/\s+/g, ' ') : '';
+        const rawDob = state.colMap.dob >= 0 ? row[state.colMap.dob] : '';
+        const rawGender = state.colMap.gender >= 0 ? row[state.colMap.gender] : '';
+        const rawClass = state.colMap.className >= 0 ? String(row[state.colMap.className] || '').trim() : '';
+        const sub1 = state.colMap.sub1 >= 0 ? normalizeSubject(row[state.colMap.sub1]) : '';
+        const sub2 = state.colMap.sub2 >= 0 ? normalizeSubject(row[state.colMap.sub2]) : '';
+
+        if (!fullName) {
+          invalid.push({ rowNum: r + 1, name: '(Trống tên)', reason: 'Thiếu Họ và tên' });
+          continue;
+        }
+        if (!sub1 && !sub2) {
+          invalid.push({ rowNum: r + 1, name: fullName, reason: 'Thiếu môn tự chọn (cần ít nhất 1 môn tự chọn)' });
+          continue;
+        }
+        if (sub1 && sub2 && sub1 === sub2) {
+          invalid.push({ rowNum: r + 1, name: fullName, reason: `Trùng 2 môn tự chọn (${sub1})` });
+          continue;
+        }
+
+        const isSingleElective = !sub1 || !sub2;
+        const primarySub1 = sub1 || sub2;
+        const secondarySub2 = isSingleElective ? '' : sub2;
+
+        valid.push({
+          id: `ST_${r}_${valid.length + 1}`,
+          origIndex: valid.length,
+          originalSbd: rawSbd,
+          sbd: rawSbd,
+          fullName,
+          dob: normalizeDateToDDMMYYYY(rawDob),
+          gender: normalizeGender(rawGender),
+          className: rawClass || (isSingleElective ? 'Tự do' : ''),
+          isSingleElective,
+          sub1: primarySub1,
+          sub2: secondarySub2,
+        });
+      }
+
+      state.studentsValid = valid;
+      state.studentsInvalid = invalid;
+
+      // Immediately pre-assign SBDs if not waiting for room order
+      const cfg = getCouncilConfig();
+      if (cfg.sbdOrderRule !== 'by_room') {
+        applySbdNumberingToCollection(state.studentsValid, []);
+      }
+
+      updateSbdLivePreview();
+      renderValidationBox();
+    }
+
+    function renderValidationBox() {
+      const box = document.getElementById('validationBox');
+      if (!box) return;
+      const vCount = state.studentsValid.length;
+      const invCount = state.studentsInvalid.length;
+      const missingSbdCount = state.studentsValid.filter((s) => !s.originalSbd).length;
+      const singleElectiveCount = state.studentsValid.filter((s) => s.isSingleElective).length;
+      const cfg = getCouncilConfig();
+
+      if (vCount === 0) {
+        box.className = 'validation-box validation-err';
+        box.innerHTML = `<strong>Chưa có thí sinh hợp lệ.</strong> Vui lòng kiểm tra lại ánh xạ cột Họ và tên, Môn tự chọn 1 và Môn tự chọn 2.`;
+        return;
+      }
+
+      const singleNote =
+        singleElectiveCount > 0 ? ` (gồm <strong>${singleElectiveCount}</strong> TS tự do thi 1 môn)` : '';
+
+      let sbdNote = '';
+      if (missingSbdCount > 0 && cfg.sbdMode !== 'keep') {
+        sbdNote =
+          cfg.sbdOrderRule === 'by_room'
+            ? ` • Sẽ tự động cấp SBD theo thứ tự phòng cho <strong>${missingSbdCount}</strong> TS sau khi xếp phòng.`
+            : ` • Đã tự động cấp SBD cho <strong>${missingSbdCount}</strong> thí sinh chưa có SBD.`;
+      }
+
+      if (invCount > 0) {
+        const sampleErrs = state.studentsInvalid
+          .slice(0, 3)
+          .map((e) => `Dòng ${e.rowNum} (${escapeHtml(e.name)}): ${escapeHtml(e.reason)}`)
+          .join('; ');
+        box.className = 'validation-box validation-warn';
+        box.innerHTML = `<strong>Hợp lệ: ${vCount} thí sinh</strong>${singleNote}${sbdNote} • Bỏ qua <strong>${invCount}</strong> dòng lỗi (${sampleErrs}${invCount > 3 ? '...' : ''}).`;
+      } else {
+        box.className = 'validation-box validation-ok';
+        box.innerHTML = `<strong>Sẵn sàng sắp xếp: ${vCount} thí sinh hợp lệ</strong>${singleNote}${sbdNote} (0 dòng lỗi). Nhấn nút <strong>"Sắp Xếp Phòng Thi &amp; Phân Ca Tối Ưu"</strong> để chạy.`;
+      }
+    }
+
+    function loadSheetMatrix(matrix, fileLabel) {
+      state.rawRows = matrix;
+      state.uploadedFileName = fileLabel;
+      document.getElementById('uploadedFileName').textContent = fileLabel;
+
+      const detected = detectHeaderRowAndColumns(matrix);
+      state.headerRowIndex = detected.headerRowIndex;
+      state.headers = detected.headers;
+      state.colMap = detected.colMap;
+
+      populateMappingSelects();
+      applyColumnMapping();
+    }
+
+    async function handleFileUpload(file) {
+      if (!file) return;
+      const nameLow = file.name.toLowerCase();
+
+      try {
+        if (nameLow.endsWith('.json')) {
+          const text = await file.text();
+          importProjectJsonText(text);
+          return;
+        }
+
+        if (nameLow.endsWith('.xls')) {
+          showToast('Tệp .xls định dạng cũ chưa được hỗ trợ trực tiếp. Vui lòng lưu sang .xlsx trong Excel rồi tải lại!', 'warning');
+          return;
+        }
+
+        if (nameLow.endsWith('.csv') || nameLow.endsWith('.txt')) {
+          const text = await file.text();
+          const matrix = parseCsvText(text);
+          state.parsedWorkbook = null;
+          document.getElementById('sheetSelectorWrap').classList.add('hidden');
+          loadSheetMatrix(matrix, `Tệp CSV: ${file.name}`);
+          saveDraftToLocalStorage();
+          showToast(`Đã nạp tệp ${file.name} (${state.studentsValid.length} thí sinh hợp lệ).`, 'success');
+          return;
+        }
+
+        const buffer = await file.arrayBuffer();
+        const wb = await readXlsxWorkbook(buffer);
+        state.parsedWorkbook = wb;
+
+        const sheetWrap = document.getElementById('sheetSelectorWrap');
+        const sheetSel = document.getElementById('sheetSelect');
+        if (wb.sheetNames.length > 1) {
+          sheetWrap.classList.remove('hidden');
+          sheetSel.innerHTML = wb.sheetNames
+            .map((sn) => `<option value="${escapeHtml(sn)}">${escapeHtml(sn)}</option>`)
+            .join('');
+        } else {
+          sheetWrap.classList.add('hidden');
+        }
+
+        const firstSheet = wb.sheetNames[0];
+        loadSheetMatrix(wb.sheets[firstSheet], `Tệp Excel: ${file.name} (${firstSheet})`);
+        saveDraftToLocalStorage();
+        showToast(`Đã nạp thành công ${file.name} (${state.studentsValid.length} thí sinh hợp lệ).`, 'success');
+      } catch (err) {
+        console.error(err);
+        showToast(`Lỗi đọc tệp: ${err.message || 'Không thể phân tích nội dung tệp.'}`, 'error');
+      }
+    }
+
+    /* ==========================================================================
+       MODULE F: 3-STEP OPTIMAL ROOM SCHEDULING, TAIL BALANCING & SHIFT ASSIGNMENT
+       ========================================================================== */
+    function balanceTailRooms(rawRooms, maxCap, balanceMode) {
+      if (!Array.isArray(rawRooms) || rawRooms.length < 2 || balanceMode === 'off') {
+        return { rooms: rawRooms, balancedInfo: null };
+      }
+
+      const totalRooms = rawRooms.length;
+      const lastSize = rawRooms[totalRooms - 1].students.length;
+      const minTarget = Math.max(2, Math.ceil(maxCap * 0.5));
+
+      if (balanceMode === 'auto_smart' && lastSize >= minTarget) {
+        return { rooms: rawRooms, balancedInfo: null };
+      }
+      if (balanceMode === 'always_tail' && lastSize >= maxCap - 2) {
+        return { rooms: rawRooms, balancedInfo: null };
+      }
+
+      // Expand tail window `k` backward until average student count per balanced room reaches `minTarget`
+      let k = 2;
+      let tailStudentsCount = rawRooms[totalRooms - 1].students.length + rawRooms[totalRooms - 2].students.length;
+      while (k < totalRooms && Math.floor(tailStudentsCount / k) < minTarget) {
+        k++;
+        tailStudentsCount += rawRooms[totalRooms - k].students.length;
+      }
+
+      const baseSize = Math.floor(tailStudentsCount / k);
+      const extraCount = tailStudentsCount % k;
+      const targetCaps = [];
+      for (let j = 0; j < k; j++) {
+        targetCaps.push(Math.min(maxCap, baseSize + (j < extraCount ? 1 : 0)));
+      }
+
+      const currentTailSizes = rawRooms.slice(totalRooms - k).map((r) => r.students.length);
+      if (currentTailSizes.every((sz, idx) => sz === targetCaps[idx])) {
+        return { rooms: rawRooms, balancedInfo: null };
+      }
+
+      // Collect all students from the last `k` rooms and group by cohort (`pairKey`) to preserve subject affinity
+      const tailStudents = [];
+      for (let rIdx = totalRooms - k; rIdx < totalRooms; rIdx++) {
+        tailStudents.push(...rawRooms[rIdx].students);
+      }
+
+      const cohortMap = new Map();
+      for (const st of tailStudents) {
+        if (!cohortMap.has(st.pairKey)) {
+          cohortMap.set(st.pairKey, {
+            pairKey: st.pairKey,
+            pair: st.pair,
+            isSingleElective: Boolean(st.isSingleElective),
+            students: [],
+          });
+        }
+        cohortMap.get(st.pairKey).students.push(st);
+      }
+
+      const cohorts = Array.from(cohortMap.values()).sort((a, b) => b.students.length - a.students.length);
+      const balancedBuckets = targetCaps.map((cap) => ({
+        targetCap: cap,
+        students: [],
+      }));
+
+      for (const cohort of cohorts) {
+        cohort.students.sort((a, b) => compareVietnameseNames(a.fullName, b.fullName));
+        let cursor = 0;
+
+        while (cursor < cohort.students.length) {
+          const remainingInCohort = cohort.students.length - cursor;
+          let bestBucketIdx = -1;
+          let bestScore = -Infinity;
+
+          for (let bIdx = 0; bIdx < balancedBuckets.length; bIdx++) {
+            const bucket = balancedBuckets[bIdx];
+            const remCap = bucket.targetCap - bucket.students.length;
+            if (remCap <= 0) continue;
+
+            let sharedPairs = 0;
+            let sharedSubs = 0;
+            const existingSubs = new Set();
+            for (const st of bucket.students) {
+              existingSubs.add(st.sub1);
+              if (st.sub2) existingSubs.add(st.sub2);
+              if (st.pairKey === cohort.pairKey) sharedPairs++;
+            }
+            if (existingSubs.has(cohort.pair[0])) sharedSubs++;
+            if (cohort.pair[1] && existingSubs.has(cohort.pair[1])) sharedSubs++;
+
+            const fitsWhole = remCap >= remainingInCohort ? 1 : 0;
+            const score =
+              fitsWhole * 1000 +
+              sharedPairs * 500 +
+              sharedSubs * (cohort.isSingleElective ? 450 : 200) +
+              Math.min(remCap, remainingInCohort) * 10 -
+              bIdx * 0.1;
+
+            if (score > bestScore) {
+              bestScore = score;
+              bestBucketIdx = bIdx;
+            }
+          }
+
+          if (bestBucketIdx === -1) break;
+          const chosenBucket = balancedBuckets[bestBucketIdx];
+          const take = Math.min(remainingInCohort, chosenBucket.targetCap - chosenBucket.students.length);
+          chosenBucket.students.push(...cohort.students.slice(cursor, cursor + take));
+          cursor += take;
+        }
+      }
+
+      const headRooms = rawRooms.slice(0, totalRooms - k);
+      const newTailRooms = balancedBuckets
+        .filter((b) => b.students.length > 0)
+        .map((b) => ({
+          isPure: false,
+          students: b.students,
+        }));
+
+      return {
+        rooms: [...headRooms, ...newTailRooms],
+        balancedInfo: {
+          k: newTailRooms.length,
+          sizes: newTailRooms.map((r) => r.students.length),
+          fromSizes: currentTailSizes,
+        },
+      };
+    }
+
+    function recalculateRoomMetrics(room) {
+      const students = room.students;
+      students.sort((a, b) => compareVietnameseNames(a.fullName, b.fullName));
+
+      const roomPairMap = new Map();
+      for (const st of students) {
+        let sortedPair;
+        let pairKey;
+        if (st.isSingleElective) {
+          const singleSub = st.sub1 || st.sub2;
+          sortedPair = [singleSub, ''];
+          pairKey = `SINGLE|||${singleSub}`;
+        } else {
+          sortedPair = [st.sub1, st.sub2].sort((a, b) => a.localeCompare(b, 'vi'));
+          pairKey = `${sortedPair[0]}|||${sortedPair[1]}`;
+        }
+        st.pair = sortedPair;
+        st.pairKey = pairKey;
+        if (!roomPairMap.has(pairKey)) {
+          roomPairMap.set(pairKey, {
+            pair: sortedPair,
+            isSingleElective: Boolean(st.isSingleElective),
+            count: 0,
+          });
+        }
+        roomPairMap.get(pairKey).count++;
+      }
+
+      const distinctPairs = Array.from(roomPairMap.entries()).map(([pairKey, info]) => ({
+        pairKey,
+        pair: info.pair,
+        isSingleElective: info.isSingleElective,
+        count: info.count,
+      }));
+
+      // Find optimal shift assignment (Ca 1 vs Ca 2) minimizing distinct exam envelopes
+      const nPairs = distinctPairs.length;
+      let bestMask = 0;
+      let bestShiftScore = -Infinity;
+
+      const evaluateMask = (mask) => {
+        const ca1Map = new Map();
+        const ca2Map = new Map();
+        for (let p = 0; p < nPairs; p++) {
+          const bit = (mask >> p) & 1;
+          const [s0, s1] = distinctPairs[p].pair;
+          const c1Sub = bit === 0 ? s0 : s1;
+          const c2Sub = bit === 0 ? s1 : s0;
+          const w = distinctPairs[p].count;
+          if (c1Sub) ca1Map.set(c1Sub, (ca1Map.get(c1Sub) || 0) + w);
+          if (c2Sub) ca2Map.set(c2Sub, (ca2Map.get(c2Sub) || 0) + w);
+        }
+        const totalDistinctEnvelopes = ca1Map.size + ca2Map.size;
+        const maxCa1 = ca1Map.size > 0 ? Math.max(...ca1Map.values()) : 0;
+        const maxCa2 = ca2Map.size > 0 ? Math.max(...ca2Map.values()) : 0;
+        return -totalDistinctEnvelopes * 1000 + (maxCa1 + maxCa2) * 10 - mask * 0.001;
+      };
+
+      if (nPairs <= 14) {
+        const totalMasks = 1 << nPairs;
+        for (let m = 0; m < totalMasks; m++) {
+          const sc = evaluateMask(m);
+          if (sc > bestShiftScore) {
+            bestShiftScore = sc;
+            bestMask = m;
+          }
+        }
+      } else {
+        // Greedy fallback if >14 distinct pairs in a single large room
+        let mask = 0;
+        for (let p = 0; p < nPairs; p++) {
+          const sc0 = evaluateMask(mask);
+          const sc1 = evaluateMask(mask | (1 << p));
+          if (sc1 > sc0) mask |= 1 << p;
+        }
+        bestMask = mask;
+      }
+
+      const pairShiftAssignment = new Map();
+      for (let p = 0; p < nPairs; p++) {
+        const bit = (bestMask >> p) & 1;
+        const [s0, s1] = distinctPairs[p].pair;
+        pairShiftAssignment.set(distinctPairs[p].pairKey, {
+          ca1: bit === 0 ? s0 : s1,
+          ca2: bit === 0 ? s1 : s0,
+        });
+      }
+
+      const ca1Summary = new Map();
+      const ca2Summary = new Map();
+      let totalExamSlots = 0;
+
+      students.forEach((st, idx) => {
+        st.seatNumber = idx + 1;
+        st.roomNumber = room.roomNumber;
+        st.roomNumberPadded = room.roomNumberPadded;
+        st.roomLabel = room.roomLabel;
+
+        const shifts = pairShiftAssignment.get(st.pairKey);
+        st.ca1Subject = shifts.ca1 || '';
+        st.ca2Subject = shifts.ca2 || '';
+
+        if (st.isSingleElective) {
+          const activeSub = st.ca1Subject || st.ca2Subject;
+          const shiftTag = st.ca1Subject ? 'Ca 1' : 'Ca 2';
+          st.electivePairLabel = `${activeSub} (1 môn - ${shiftTag})`;
+        } else {
+          st.electivePairLabel = `${st.ca1Subject} - ${st.ca2Subject}`;
+        }
+
+        if (st.ca1Subject) {
+          ca1Summary.set(st.ca1Subject, (ca1Summary.get(st.ca1Subject) || 0) + 1);
+          totalExamSlots++;
+        }
+        if (st.ca2Subject) {
+          ca2Summary.set(st.ca2Subject, (ca2Summary.get(st.ca2Subject) || 0) + 1);
+          totalExamSlots++;
+        }
+      });
+
+      const maxCa1Count = ca1Summary.size > 0 ? Math.max(...ca1Summary.values()) : 0;
+      const maxCa2Count = ca2Summary.size > 0 ? Math.max(...ca2Summary.values()) : 0;
+
+      room.isPure = distinctPairs.length <= 1;
+      room.distinctPairs = distinctPairs;
+      room.ca1Summary = Array.from(ca1Summary.entries()).sort((a, b) => b[1] - a[1]);
+      room.ca2Summary = Array.from(ca2Summary.entries()).sort((a, b) => b[1] - a[1]);
+      room.homogeneityPct = totalExamSlots > 0 ? Math.round(((maxCa1Count + maxCa2Count) / totalExamSlots) * 100) : 100;
+    }
+
+    function runSchedulingAlgorithm() {
+      if (state.studentsValid.length === 0) {
+        showToast('Vui lòng nạp danh sách thí sinh hoặc bấm "Dữ liệu mẫu" trước!', 'warning');
+        return;
+      }
+
+      const cfg = getCouncilConfig();
+      const maxCap = cfg.maxPerRoom;
+
+      // Apply SBD numbering before room grouping if order rule is NOT 'by_room'
+      if (cfg.sbdOrderRule !== 'by_room') {
+        applySbdNumberingToCollection(state.studentsValid, []);
+      }
+
+      const students = state.studentsValid.map((s) => ({ ...s }));
+
+      // STEP 1: Group cohorts (both 2-subject unordered pairs {A, B} and 1-subject independent cohorts {S})
+      const pairGroupsMap = new Map();
+      for (const st of students) {
+        let sortedPair;
+        let pairKey;
+        if (st.isSingleElective) {
+          const singleSub = st.sub1 || st.sub2;
+          sortedPair = [singleSub, ''];
+          pairKey = `SINGLE|||${singleSub}`;
+        } else {
+          sortedPair = [st.sub1, st.sub2].sort((a, b) => a.localeCompare(b, 'vi'));
+          pairKey = `${sortedPair[0]}|||${sortedPair[1]}`;
+        }
+        st.pair = sortedPair;
+        st.pairKey = pairKey;
+
+        if (!pairGroupsMap.has(pairKey)) {
+          pairGroupsMap.set(pairKey, {
+            pairKey,
+            pair: sortedPair,
+            isSingleElective: Boolean(st.isSingleElective),
+            students: [],
+          });
+        }
+        pairGroupsMap.get(pairKey).students.push(st);
+      }
+
+      const pureRooms = [];
+      const remainderCohorts = [];
+
+      const sortedGroups = Array.from(pairGroupsMap.values()).sort((a, b) => b.students.length - a.students.length);
+
+      for (const grp of sortedGroups) {
+        grp.students.sort((a, b) => compareVietnameseNames(a.fullName, b.fullName));
+        let cursor = 0;
+        while (grp.students.length - cursor >= maxCap) {
+          pureRooms.push({
+            isPure: true,
+            students: grp.students.slice(cursor, cursor + maxCap),
+          });
+          cursor += maxCap;
+        }
+        if (cursor < grp.students.length) {
+          remainderCohorts.push({
+            pairKey: grp.pairKey,
+            pair: grp.pair,
+            isSingleElective: grp.isSingleElective,
+            students: grp.students.slice(cursor),
+          });
+        }
+      }
+
+      // STEP 2: Best-Fit bin packing prioritizing shared subjects (including 1-elective independent candidates)
+      remainderCohorts.sort((a, b) => b.students.length - a.students.length);
+      const mixedRooms = [];
+
+      for (const cohort of remainderCohorts) {
+        let bestRoom = null;
+        let bestScore = -Infinity;
+
+        for (const r of mixedRooms) {
+          const remainingSpace = maxCap - r.students.length;
+          if (remainingSpace < cohort.students.length) continue;
+
+          let sharedPairs = 0;
+          let sharedSubjects = 0;
+          const existingSubjects = new Set();
+          for (const st of r.students) {
+            existingSubjects.add(st.sub1);
+            if (st.sub2) existingSubjects.add(st.sub2);
+            if (st.pairKey === cohort.pairKey) sharedPairs++;
+          }
+          if (existingSubjects.has(cohort.pair[0])) sharedSubjects++;
+          if (cohort.pair[1] && existingSubjects.has(cohort.pair[1])) sharedSubjects++;
+
+          const tightnessBonus = cohort.students.length / remainingSpace;
+          const subWeight = cohort.isSingleElective ? 450 : 200;
+          const score = sharedPairs * 500 + sharedSubjects * subWeight + tightnessBonus * 50;
+          if (score > bestScore) {
+            bestScore = score;
+            bestRoom = r;
+          }
+        }
+
+        if (bestRoom) {
+          bestRoom.students.push(...cohort.students);
+        } else {
+          let ptr = 0;
+          while (ptr < cohort.students.length) {
+            mixedRooms.push({
+              isPure: false,
+              students: cohort.students.slice(ptr, ptr + maxCap),
+            });
+            ptr += maxCap;
+          }
+        }
+      }
+
+      // STEP 2.5: Automatic Tail-Room Student Balancing
+      const { rooms: balancedRawRooms, balancedInfo } = balanceTailRooms(
+        [...pureRooms, ...mixedRooms],
+        maxCap,
+        cfg.balanceTailRooms
+      );
+      state.tailBalancedInfo = balancedInfo;
+
+      // STEP 3: Optimal Shift Assignment (Ca 1 vs Ca 2) per room + Vietnamese ABC ordering
+      const finalizedRooms = balancedRawRooms.map((roomObj, idx) => {
+        const roomNumber = idx + 1;
+        const roomNumberPadded = String(roomNumber).padStart(2, '0');
+        const roomLabel = `Phòng ${roomNumberPadded}`;
+
+        const room = {
+          roomNumber,
+          roomNumberPadded,
+          roomLabel,
+          maxCap,
+          isPure: true,
+          students: roomObj.students,
+          distinctPairs: [],
+          ca1Summary: [],
+          ca2Summary: [],
+          homogeneityPct: 100,
+        };
+
+        recalculateRoomMetrics(room);
+        return room;
+      });
+
+      // If SBD order rule is 'by_room', assign sequential SBDs across Phòng 01 -> Phòng N
+      if (cfg.sbdOrderRule === 'by_room') {
+        applySbdNumberingToCollection(state.studentsValid, finalizedRooms);
+      }
+
+      state.rooms = finalizedRooms;
+      document.getElementById('resultsSection').classList.remove('hidden');
+      updateSbdLivePreview();
+      populateFiltersAndSelectors();
+      renderAllResults();
+      saveDraftToLocalStorage();
+
+      const balMsg = balancedInfo
+        ? ` (Đã tự động cân bằng ${balancedInfo.k} phòng cuối: ${balancedInfo.sizes.join(' & ')} HS)`
+        : '';
+      showToast(
+        `Đã sắp xếp tối ưu ${students.length} thí sinh vào ${finalizedRooms.length} phòng thi${balMsg}!`,
+        'success'
+      );
+    }
+
+    function moveStudentToRoom(studentId, targetRoomNum) {
+      const fromRoomIdx = state.rooms.findIndex((r) => r.students.some((s) => s.id === studentId));
+      const toRoomIdx = state.rooms.findIndex((r) => r.roomNumber === targetRoomNum);
+      if (fromRoomIdx === -1 || toRoomIdx === -1 || fromRoomIdx === toRoomIdx) return;
+
+      const fromRoom = state.rooms[fromRoomIdx];
+      const toRoom = state.rooms[toRoomIdx];
+      const stIdx = fromRoom.students.findIndex((s) => s.id === studentId);
+      if (stIdx === -1) return;
+
+      const [movedStudent] = fromRoom.students.splice(stIdx, 1);
+      toRoom.students.push(movedStudent);
+      state.tailBalancedInfo = null;
+
+      // Remove empty rooms if any and re-index all remaining rooms cleanly
+      state.rooms = state.rooms.filter((r) => r.students.length > 0);
+      state.rooms.forEach((r, idx) => {
+        r.roomNumber = idx + 1;
+        r.roomNumberPadded = String(idx + 1).padStart(2, '0');
+        r.roomLabel = `Phòng ${r.roomNumberPadded}`;
+        recalculateRoomMetrics(r);
+      });
+
+      const cfg = getCouncilConfig();
+      if (cfg.sbdOrderRule === 'by_room') {
+        applySbdNumberingToCollection(state.studentsValid, state.rooms);
+      }
+
+      populateFiltersAndSelectors();
+      renderAllResults();
+      saveDraftToLocalStorage();
+      showToast(`Đã chuyển thí sinh ${movedStudent.fullName} sang ${toRoom.roomLabel}.`, 'info');
+    }
+
+    /* ==========================================================================
+       MODULE G: UI RENDERING (KPIs, SEAT MAP, ROOM LIST, COUNCIL LIST, PREVIEW)
+       ========================================================================== */
+    function populateFiltersAndSelectors() {
+      const roomSel = document.getElementById('filterRoom');
+      const prevRoomSel = document.getElementById('previewRoomSelect');
+      const prevSelectedRoom = roomSel.value;
+      const prevPreviewRoom = prevRoomSel.value;
+
+      const roomOpts = state.rooms
+        .map((r) => `<option value="${r.roomNumber}">${escapeHtml(r.roomLabel)} (${r.students.length} TS)</option>`)
+        .join('');
+
+      roomSel.innerHTML = `<option value="ALL">Tất cả phòng thi (${state.rooms.length})</option>${roomOpts}`;
+      if (prevSelectedRoom === 'ALL' || state.rooms.some((r) => String(r.roomNumber) === prevSelectedRoom)) {
+        roomSel.value = prevSelectedRoom;
+      } else {
+        roomSel.value = 'ALL';
+        state.filterRoom = 'ALL';
+      }
+
+      prevRoomSel.innerHTML = roomOpts;
+      if (state.rooms.some((r) => String(r.roomNumber) === prevPreviewRoom)) {
+        prevRoomSel.value = prevPreviewRoom;
+      } else if (state.rooms.length > 0) {
+        prevRoomSel.value = String(state.rooms[0].roomNumber);
+      }
+
+      const subjectsSet = new Set();
+      for (const r of state.rooms) {
+        for (const st of r.students) {
+          if (st.sub1) subjectsSet.add(st.sub1);
+          if (st.sub2) subjectsSet.add(st.sub2);
+        }
+      }
+      const subSel = document.getElementById('filterSubject');
+      const prevSub = subSel.value;
+      const subOpts = Array.from(subjectsSet)
+        .sort((a, b) => a.localeCompare(b, 'vi'))
+        .map((s) => `<option value="${escapeHtml(s)}">Môn ${escapeHtml(s)}</option>`)
+        .join('');
+      subSel.innerHTML = `<option value="ALL">Tất cả môn</option>${subOpts}`;
+      if (prevSub === 'ALL' || subjectsSet.has(prevSub)) {
+        subSel.value = prevSub;
+      } else {
+        subSel.value = 'ALL';
+        state.filterSubject = 'ALL';
+      }
+    }
+
+    function renderKpis() {
+      const totalRooms = state.rooms.length;
+      const totalStudents = state.rooms.reduce((sum, r) => sum + r.students.length, 0);
+      const pureCount = state.rooms.filter((r) => r.isPure).length;
+      const mixedCount = totalRooms - pureCount;
+
+      const pairSet = new Set();
+      let weightedHomogeneity = 0;
+      let singleElectiveCount = 0;
+      for (const r of state.rooms) {
+        for (const st of r.students) {
+          pairSet.add(st.pairKey);
+          if (st.isSingleElective) singleElectiveCount++;
+        }
+        weightedHomogeneity += r.homogeneityPct * r.students.length;
+      }
+      const avgHomogeneity = totalStudents > 0 ? Math.round(weightedHomogeneity / totalStudents) : 100;
+      const cfg = getCouncilConfig();
+
+      document.getElementById('kpiTotalStudents').textContent = totalStudents;
+      document.getElementById('kpiPairsCount').textContent =
+        singleElectiveCount > 0
+          ? `${pairSet.size} tổ hợp • ${singleElectiveCount} TS tự do (1 môn)`
+          : `${pairSet.size} tổ hợp môn`;
+      document.getElementById('kpiTotalRooms').textContent = totalRooms;
+      document.getElementById('kpiRoomCapNote').textContent = state.tailBalancedInfo
+        ? `Tối đa ${cfg.maxPerRoom} • Đã cân bằng cuối`
+        : `Tối đa ${cfg.maxPerRoom} HS/phòng`;
+      document.getElementById('kpiPureRooms').textContent = pureCount;
+      document.getElementById('kpiMixedRooms').textContent = mixedCount;
+      document.getElementById('kpiHomogeneity').textContent = `${avgHomogeneity}%`;
+    }
+
+    function matchesSearchAndSubject(st) {
+      if (state.filterSubject !== 'ALL') {
+        if (st.sub1 !== state.filterSubject && st.sub2 !== state.filterSubject) return false;
+      }
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        const hay = `${st.sbd} ${st.fullName} ${st.className} ${st.sub1} ${st.sub2}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    }
+
+    function getFilteredRooms() {
+      return state.rooms.filter((r) => {
+        if (state.filterRoom !== 'ALL' && String(r.roomNumber) !== state.filterRoom) return false;
+        if (state.filterSubject !== 'ALL' || state.searchQuery) {
+          return r.students.some(matchesSearchAndSubject);
+        }
+        return true;
+      });
+    }
+
+    function renderRoomShiftHeaderHtml(room) {
+      const ca1Html =
+        room.ca1Summary.length > 0
+          ? room.ca1Summary
+              .map(([sub, cnt]) => `<span class="sub-pill ${getSubjectClass(sub)}">${escapeHtml(sub)}: <strong>${cnt}</strong></span>`)
+              .join(' ')
+          : `<span style="color:var(--text-muted); font-style:italic;">Không có thí sinh</span>`;
+      const ca2Html =
+        room.ca2Summary.length > 0
+          ? room.ca2Summary
+              .map(([sub, cnt]) => `<span class="sub-pill ${getSubjectClass(sub)}">${escapeHtml(sub)}: <strong>${cnt}</strong></span>`)
+              .join(' ')
+          : `<span style="color:var(--text-muted); font-style:italic;">Không có thí sinh</span>`;
+
+      const typeBadge = room.isPure
+        ? `<span class="room-badge-pure">Phòng thuần (${escapeHtml(room.distinctPairs[0]?.pair.filter(Boolean).join(' - ') || '')})</span>`
+        : `<span class="room-badge-mixed">Phòng ghép (${room.distinctPairs.length} nhóm • Gom túi đề ${room.homogeneityPct}%)</span>`;
+
+      return `
+        <div class="room-card-header">
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:8px;">
+            <strong style="font-size:15px;">${escapeHtml(room.roomLabel)}</strong>
+            <span style="font-size:12.5px; color:var(--text-secondary);">Sĩ số: <strong>${room.students.length}</strong> / ${room.maxCap} thí sinh</span>
+            ${typeBadge}
+          </div>
+          <button type="button" class="btn btn-outline" style="padding:5px 10px; font-size:12px;" onclick="openPreviewForRoom(${room.roomNumber})">
+            Xem biểu mẫu A4
+          </button>
+        </div>
+        <div class="shift-summary-bar">
+          <div><strong>Túi đề Ca 1:</strong> ${ca1Html}</div>
+          <div><strong>Túi đề Ca 2:</strong> ${ca2Html}</div>
+        </div>
+      `;
+    }
+
+    function renderSeatsView() {
+      const container = document.getElementById('tabSeats');
+      const rooms = getFilteredRooms();
+      if (rooms.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:24px;">Không tìm thấy phòng thi hoặc thí sinh phù hợp bộ lọc.</p>`;
+        return;
+      }
+
+      const hasActiveFilter = state.filterSubject !== 'ALL' || Boolean(state.searchQuery);
+
+      container.innerHTML = rooms
+        .map((room) => {
+          const seatsHtml = room.students
+            .map((st) => {
+              const isMatch = hasActiveFilter && matchesSearchAndSubject(st);
+              return `
+                <div class="seat-item ${isMatch ? 'highlight' : ''}">
+                  <div class="seat-top">
+                    <span class="seat-num">Ghế ${String(st.seatNumber).padStart(2, '0')}</span>
+                    <span class="seat-sbd">${escapeHtml(st.sbd || '—')}</span>
+                  </div>
+                  <div class="seat-name" title="${escapeHtml(st.fullName)}">${escapeHtml(st.fullName)}</div>
+                  <div class="seat-meta">Lớp: <strong>${escapeHtml(st.className || '—')}</strong> • ${escapeHtml(st.dob || '')}</div>
+                  <div class="seat-shifts">
+                    ${
+                      st.ca1Subject
+                        ? `<span class="sub-pill ${getSubjectClass(st.ca1Subject)}">C1: ${escapeHtml(st.ca1Subject)}</span>`
+                        : `<span class="sub-pill" style="background:var(--bg-subtle); color:var(--text-muted); border-color:var(--border-light);">C1: Nghỉ</span>`
+                    }
+                    ${
+                      st.ca2Subject
+                        ? `<span class="sub-pill ${getSubjectClass(st.ca2Subject)}">C2: ${escapeHtml(st.ca2Subject)}</span>`
+                        : `<span class="sub-pill" style="background:var(--bg-subtle); color:var(--text-muted); border-color:var(--border-light);">C2: Nghỉ</span>`
+                    }
+                  </div>
+                </div>
+              `;
+            })
+            .join('');
+
+          return `
+            <div class="room-card">
+              ${renderRoomShiftHeaderHtml(room)}
+              <div class="seat-grid">${seatsHtml}</div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderRoomListView() {
+      const container = document.getElementById('tabRoomList');
+      const rooms = getFilteredRooms();
+      if (rooms.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:24px;">Không tìm thấy dữ liệu phù hợp bộ lọc.</p>`;
+        return;
+      }
+
+      const hasActiveFilter = state.filterSubject !== 'ALL' || Boolean(state.searchQuery);
+
+      container.innerHTML = rooms
+        .map((room) => {
+          const rowsHtml = room.students
+            .map((st) => {
+              const isMatch = hasActiveFilter && matchesSearchAndSubject(st);
+              const moveOpts = state.rooms
+                .map(
+                  (r) =>
+                    `<option value="${r.roomNumber}" ${r.roomNumber === room.roomNumber ? 'selected' : ''}>${escapeHtml(r.roomLabel)} (${r.students.length})</option>`
+                )
+                .join('');
+
+              return `
+                <tr class="${isMatch ? 'row-highlight' : ''}">
+                  <td class="text-center font-mono">${String(st.seatNumber).padStart(2, '0')}</td>
+                  <td class="text-center font-mono"><strong>${escapeHtml(st.sbd || '—')}</strong></td>
+                  <td><strong>${escapeHtml(st.fullName)}</strong></td>
+                  <td class="text-center">${escapeHtml(st.dob || '—')}</td>
+                  <td class="text-center">${escapeHtml(st.gender || '—')}</td>
+                  <td class="text-center">${escapeHtml(st.className || '—')}</td>
+                  <td>${
+                    st.ca1Subject
+                      ? `<span class="sub-pill ${getSubjectClass(st.ca1Subject)}">${escapeHtml(st.ca1Subject)}</span>`
+                      : `<span style="font-size:11.5px; color:var(--text-muted); font-style:italic;">Nghỉ (Tự do)</span>`
+                  }</td>
+                  <td>${
+                    st.ca2Subject
+                      ? `<span class="sub-pill ${getSubjectClass(st.ca2Subject)}">${escapeHtml(st.ca2Subject)}</span>`
+                      : `<span style="font-size:11.5px; color:var(--text-muted); font-style:italic;">Nghỉ (Tự do)</span>`
+                  }</td>
+                  <td class="text-center">
+                    <select class="form-control" style="padding:4px 6px; font-size:12px; width:auto;" onchange="moveStudentToRoom('${escapeHtml(st.id)}', Number(this.value))" aria-label="Chuyển phòng cho ${escapeHtml(st.fullName)}">
+                      ${moveOpts}
+                    </select>
+                  </td>
+                </tr>
+              `;
+            })
+            .join('');
+
+          return `
+            <div class="room-card">
+              ${renderRoomShiftHeaderHtml(room)}
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="text-center" style="width:60px;">STT</th>
+                      <th class="text-center" style="width:110px;">Số báo danh</th>
+                      <th>Họ và tên</th>
+                      <th class="text-center" style="width:105px;">Ngày sinh</th>
+                      <th class="text-center" style="width:80px;">Giới tính</th>
+                      <th class="text-center" style="width:90px;">Lớp</th>
+                      <th style="width:115px;">Ca 1 (50p)</th>
+                      <th style="width:115px;">Ca 2 (50p)</th>
+                      <th class="text-center" style="width:135px;">Chuyển phòng</th>
+                    </tr>
+                  </thead>
+                  <tbody>${rowsHtml}</tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function getSortedCouncilRecords() {
+      const cfg = getCouncilConfig();
+      const all = [];
+      for (const r of state.rooms) {
+        for (const st of r.students) {
+          all.push(st);
+        }
+      }
+
+      if (cfg.councilSortOrder === 'sbd') {
+        all.sort((a, b) => (a.sbd || '').localeCompare(b.sbd || '', undefined, { numeric: true }));
+      } else if (cfg.councilSortOrder === 'abc') {
+        all.sort((a, b) => compareVietnameseNames(a.fullName, b.fullName));
+      } else {
+        all.sort((a, b) => (a.roomNumber - b.roomNumber) || (a.seatNumber - b.seatNumber));
+      }
+
+      return all;
+    }
+
+    function renderCouncilListView() {
+      const container = document.getElementById('tabCouncilList');
+      const records = getSortedCouncilRecords().filter((st) => {
+        if (state.filterRoom !== 'ALL' && String(st.roomNumber) !== state.filterRoom) return false;
+        return matchesSearchAndSubject(st);
+      });
+
+      if (records.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:24px;">Không có thí sinh nào khớp điều kiện lọc.</p>`;
+        return;
+      }
+
+      const rowsHtml = records
+        .map(
+          (st, idx) => `
+          <tr>
+            <td class="text-center">${idx + 1}</td>
+            <td class="text-center font-mono"><strong>${escapeHtml(st.sbd || '—')}</strong></td>
+            <td><strong>${escapeHtml(st.fullName)}</strong></td>
+            <td class="text-center">${escapeHtml(st.dob || '—')}</td>
+            <td class="text-center">${escapeHtml(st.className || '—')}</td>
+            <td>${escapeHtml(st.electivePairLabel)}</td>
+            <td class="text-center"><strong>${escapeHtml(st.roomLabel)}</strong></td>
+            <td class="text-center font-mono">${String(st.seatNumber).padStart(2, '0')}</td>
+          </tr>
+        `
+        )
+        .join('');
+
+      container.innerHTML = `
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="text-center" style="width:60px;">TT</th>
+                <th class="text-center" style="width:120px;">Số báo danh</th>
+                <th>Họ và tên</th>
+                <th class="text-center" style="width:110px;">Ngày sinh</th>
+                <th class="text-center" style="width:95px;">Lớp</th>
+                <th>Môn tự chọn</th>
+                <th class="text-center" style="width:115px;">Phòng thi</th>
+                <th class="text-center" style="width:135px;">Số thứ tự trong phòng</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function buildRoomA4SheetHtml(room, formType, cfg) {
+      const chairSign = cfg.chairName
+        ? `<div style="margin-top:34px; font-weight:bold;">${escapeHtml(cfg.chairName)}</div>`
+        : `<div style="margin-top:34px;">........................................</div>`;
+
+      if (formType === 'posting') {
+        const rowsHtml = room.students
+          .map(
+            (st) => `
+            <tr>
+              <td style="text-align:center;">${st.seatNumber}</td>
+              <td style="text-align:center; font-weight:bold;">${escapeHtml(st.sbd)}</td>
+              <td style="padding-left:5px;">${escapeHtml(st.fullName)}</td>
+              <td style="text-align:center;">${escapeHtml(st.dob)}</td>
+              <td style="text-align:center;">${escapeHtml(st.gender)}</td>
+              <td style="text-align:center;">${escapeHtml(st.className)}</td>
+              <td style="text-align:center;">${escapeHtml(st.electivePairLabel)}</td>
+            </tr>
+          `
+          )
+          .join('');
+
+        return `
+          <div class="a4-sheet">
+            <div class="a4-header-grid">
+              <div>
+                <div style="font-weight:bold; text-transform:uppercase;">${escapeHtml(cfg.deptName)}</div>
+                <div style="font-weight:bold;">${escapeHtml(cfg.councilName)}</div>
+              </div>
+              <div>
+                <div style="font-weight:bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                <div style="font-weight:bold; text-decoration:underline;">Độc lập - Tự do - Hạnh phúc</div>
+              </div>
+            </div>
+            <div class="a4-title">DANH SÁCH THÍ SINH DỰ THI</div>
+            <div class="a4-subtitle">${escapeHtml(cfg.examTitle)} • ${escapeHtml(room.roomLabel.toUpperCase())}</div>
+            <div style="text-align:center; font-style:italic; margin-bottom:8px;">${escapeHtml(cfg.sessionDate)}</div>
+
+            <table class="a4-table">
+              <thead>
+                <tr>
+                  <th style="width:7%;">STT</th>
+                  <th style="width:14%;">Số báo danh</th>
+                  <th style="width:28%;">Họ và tên</th>
+                  <th style="width:13%;">Ngày sinh</th>
+                  <th style="width:9%;">Giới tính</th>
+                  <th style="width:10%;">Lớp</th>
+                  <th style="width:19%;">Môn tự chọn</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+
+            <div class="a4-footer-block">
+              <div>Danh sách này gồm có: <strong>${room.students.length}</strong> thí sinh.</div>
+              <div class="a4-sign-grid">
+                <div></div>
+                <div>
+                  <div style="font-style:italic;">Ngày ..... tháng ..... năm ${escapeHtml(cfg.examYear)}</div>
+                  <div style="font-weight:bold;">CHỦ TỊCH HỘI ĐỒNG COI THI</div>
+                  <div style="font-style:italic; font-size:9.5pt;">(Ký, ghi rõ họ tên và đóng dấu)</div>
+                  ${chairSign}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Receipt forms (Van / Toan / Elective)
+      const subVariants = [];
+      if (formType === 'receipt_van') {
+        subVariants.push({ titleSuffix: 'MÔN: NGỮ VĂN', kind: 'van' });
+      } else if (formType === 'receipt_toan') {
+        subVariants.push({ titleSuffix: 'MÔN: TOÁN', kind: 'toan' });
+      } else if (cfg.receiptMode === 'split_shifts') {
+        subVariants.push({ titleSuffix: 'BÀI THI TỰ CHỌN - CA 1', kind: 'elective_ca1' });
+        subVariants.push({ titleSuffix: 'BÀI THI TỰ CHỌN - CA 2', kind: 'elective_ca2' });
+      } else {
+        subVariants.push({ titleSuffix: 'BÀI THI TỰ CHỌN (CA 1 & CA 2)', kind: 'elective_merged' });
+      }
+
+      return subVariants
+        .map((sv) => {
+          const rowsHtml = room.students
+            .map((st) => {
+              let subVal = 'Ngữ văn';
+              let noteVal = '';
+              if (sv.kind === 'toan') {
+                subVal = 'Toán';
+              } else if (sv.kind === 'elective_merged') {
+                subVal = st.electivePairLabel;
+              } else if (sv.kind === 'elective_ca1') {
+                if (st.ca1Subject) {
+                  subVal = st.ca1Subject;
+                  if (st.isSingleElective) noteVal = 'TS tự do (1 môn)';
+                } else {
+                  subVal = 'Không thi';
+                  noteVal = 'TS tự do (thi Ca 2)';
+                }
+              } else if (sv.kind === 'elective_ca2') {
+                if (st.ca2Subject) {
+                  subVal = st.ca2Subject;
+                  if (st.isSingleElective) noteVal = 'TS tự do (1 môn)';
+                } else {
+                  subVal = 'Không thi';
+                  noteVal = 'TS tự do (thi Ca 1)';
+                }
+              }
+
+              return `
+                <tr>
+                  <td style="text-align:center;">${st.seatNumber}</td>
+                  <td style="text-align:center;">${escapeHtml(st.sbd)}</td>
+                  <td style="padding-left:4px;">${escapeHtml(st.fullName)}</td>
+                  <td style="text-align:center;">${escapeHtml(st.dob)}</td>
+                  <td style="text-align:center;">${escapeHtml(st.gender)}</td>
+                  <td style="text-align:center;">${escapeHtml(st.className)}</td>
+                  <td style="text-align:center;">${escapeHtml(subVal)}</td>
+                  <td></td>
+                  <td></td>
+                  <td style="text-align:center; font-size:8.5pt;">${escapeHtml(noteVal)}</td>
+                </tr>
+              `;
+            })
+            .join('');
+
+          const col8Header = sv.kind === 'van' ? 'Số tờ' : 'Mã đề / Số tờ';
+
+          return `
+            <div class="a4-sheet">
+              <div class="a4-header-grid">
+                <div>
+                  <div style="font-weight:bold; text-transform:uppercase;">${escapeHtml(cfg.deptName)}</div>
+                  <div style="font-weight:bold;">${escapeHtml(cfg.councilName)}</div>
+                </div>
+                <div>
+                  <div style="font-weight:bold;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                  <div style="font-weight:bold; text-decoration:underline;">Độc lập - Tự do - Hạnh phúc</div>
+                </div>
+              </div>
+              <div class="a4-title">PHIẾU THU BÀI THI - ${escapeHtml(sv.titleSuffix)}</div>
+              <div class="a4-subtitle">${escapeHtml(cfg.examTitle)} • ${escapeHtml(room.roomLabel.toUpperCase())}</div>
+              <div style="text-align:center; font-style:italic; margin-bottom:6px;">${escapeHtml(cfg.sessionDate)}</div>
+
+              <table class="a4-table">
+                <thead>
+                  <tr>
+                    <th style="width:5%;">STT</th>
+                    <th style="width:11%;">SBD</th>
+                    <th style="width:23%;">Họ và tên</th>
+                    <th style="width:10%;">Ngày sinh</th>
+                    <th style="width:6%;">Giới</th>
+                    <th style="width:7%;">Lớp</th>
+                    <th style="width:14%;">Môn thi</th>
+                    <th style="width:8%;">${col8Header}</th>
+                    <th style="width:8%;">Ký nộp</th>
+                    <th style="width:8%;">Ghi chú</th>
+                  </tr>
+                </thead>
+                <tbody>${rowsHtml}</tbody>
+              </table>
+
+              <div class="a4-footer-block">
+                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:4px;">
+                  <span>Tổng số thí sinh đăng ký: <strong>${room.students.length}</strong></span>
+                  <span>Có mặt: ..........</span>
+                  <span>Vắng mặt: ..........</span>
+                  <span>Tổng số bài thu được: .......... bài (.......... tờ)</span>
+                </div>
+                <div class="a4-sign-grid">
+                  <div>
+                    <div style="font-weight:bold;">GIÁM THỊ 1</div>
+                    <div style="font-style:italic; font-size:9.5pt;">(Ký và ghi rõ họ tên)</div>
+                  </div>
+                  <div>
+                    <div style="font-weight:bold;">GIÁM THỊ 2</div>
+                    <div style="font-style:italic; font-size:9.5pt;">(Ký và ghi rõ họ tên)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function renderPrintPreview(printAll = false) {
+      const container = document.getElementById('printArea');
+      if (!container) return;
+      if (state.rooms.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#334155;">Chưa có dữ liệu phòng thi để xem trước.</p>`;
+        return;
+      }
+
+      const cfg = getCouncilConfig();
+      const formType = document.getElementById('previewFormType').value;
+      const selectedRoomNum = Number(document.getElementById('previewRoomSelect').value);
+
+      const targetRooms = printAll
+        ? state.rooms
+        : state.rooms.filter((r) => r.roomNumber === selectedRoomNum);
+
+      const roomsToRender = targetRooms.length > 0 ? targetRooms : [state.rooms[0]];
+      container.innerHTML = roomsToRender
+        .map((r) => buildRoomA4SheetHtml(r, formType, cfg))
+        .join('');
+    }
+
+    function openPreviewForRoom(roomNumber) {
+      document.getElementById('previewRoomSelect').value = String(roomNumber);
+      switchTab('preview');
+    }
+
+    function triggerDirectPrint(printAll) {
+      if (state.rooms.length === 0) {
+        showToast('Vui lòng chạy sắp xếp phòng thi trước khi in!', 'warning');
+        return;
+      }
+      renderPrintPreview(printAll);
+      setTimeout(() => {
+        window.print();
+        if (printAll) {
+          setTimeout(() => renderPrintPreview(false), 600);
+        }
+      }, 80);
+    }
+
+    function switchTab(tabKey) {
+      state.activeTab = tabKey;
+      document.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.tab === tabKey);
+      });
+
+      document.getElementById('tabSeats').classList.toggle('hidden', tabKey !== 'seats');
+      document.getElementById('tabRoomList').classList.toggle('hidden', tabKey !== 'room_list');
+      document.getElementById('tabCouncilList').classList.toggle('hidden', tabKey !== 'council_list');
+      document.getElementById('tabPreview').classList.toggle('hidden', tabKey !== 'preview');
+
+      if (tabKey === 'seats') renderSeatsView();
+      else if (tabKey === 'room_list') renderRoomListView();
+      else if (tabKey === 'council_list') renderCouncilListView();
+      else if (tabKey === 'preview') renderPrintPreview(false);
+
+      saveDraftToLocalStorage();
+    }
+
+    function renderAllResults() {
+      renderKpis();
+      if (state.activeTab === 'seats') renderSeatsView();
+      else if (state.activeTab === 'room_list') renderRoomListView();
+      else if (state.activeTab === 'council_list') renderCouncilListView();
+      else if (state.activeTab === 'preview') renderPrintPreview(false);
+    }
+
+    /* ==========================================================================
+       MODULE H: 100% OFFLINE STYLED .XLSX GENERATOR (TIMES NEW ROMAN + A4 SETUP)
+       ========================================================================== */
+    function indexToColLetters(colIdx) {
+      let n = colIdx + 1;
+      let s = '';
+      while (n > 0) {
+        const rem = (n - 1) % 26;
+        s = String.fromCharCode(65 + rem) + s;
+        n = Math.floor((n - 1) / 26);
+      }
+      return s;
+    }
+
+    function sanitizeExcelSheetName(rawName, usedNamesSet) {
+      let cleaned = String(rawName || 'Sheet')
+        .replace(/[\\/?*\[\]:]/g, '-')
+        .trim();
+      if (!cleaned) cleaned = 'Sheet';
+      cleaned = cleaned.slice(0, 31);
+
+      let candidate = cleaned;
+      let counter = 2;
+      while (usedNamesSet.has(candidate.toLowerCase())) {
+        const suffix = `_${counter++}`;
+        candidate = cleaned.slice(0, 31 - suffix.length) + suffix;
+      }
+      usedNamesSet.add(candidate.toLowerCase());
+      return candidate;
+    }
+
+    /**
+     * Build a multi-sheet .xlsx file using ZIP STORE (method 0) + OOXML styles (Times New Roman)
+     * Style indices:
+     * 0: Default 11pt Times New Roman
+     * 1: Header Bold 11pt Center
+     * 2: Header Regular 11pt Center
+     * 3: Title Bold 13pt Center
+     * 4: Subtitle Bold 11pt Center
+     * 5: Table Header Bold 10.5pt Center + Thin Border + Light Gray Fill
+     * 6: Table Cell 10.5pt Center + Thin Border
+     * 7: Table Cell 10.5pt Left + Thin Border
+     * 8: Footer Italic 10.5pt Center
+     * 9: Footer Bold 10.5pt Center
+     * 10: Footer Left 10.5pt
+     */
+    function buildAndDownloadXlsx(sheetsSpec, filename) {
+      const encoder = new TextEncoder();
+      const usedSheetNames = new Set();
+
+      const preparedSheets = sheetsSpec.map((sh) => ({
+        name: sanitizeExcelSheetName(sh.name, usedSheetNames),
+        colWidths: sh.colWidths || [],
+        merges: sh.merges || [],
+        rows: sh.rows || [],
+      }));
+
+      // Build shared strings table
+      const sharedStrings = [];
+      const ssMap = new Map();
+      function getSsIndex(str) {
+        const key = String(str);
+        if (ssMap.has(key)) return ssMap.get(key);
+        const idx = sharedStrings.length;
+        sharedStrings.push(key);
+        ssMap.set(key, idx);
+        return idx;
+      }
+
+      const sheetXmlFiles = preparedSheets.map((sh) => {
+        const colsXml =
+          sh.colWidths.length > 0
+            ? `<cols>${sh.colWidths
+                .map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`)
+                .join('')}</cols>`
+            : '';
+
+        const rowsXml = sh.rows
+          .map((rowObj, rIdx) => {
+            const rNum = rIdx + 1;
+            const htAttr = rowObj.height ? ` ht="${rowObj.height}" customHeight="1"` : '';
+            const cellsXml = (rowObj.cells || [])
+              .map((cell, cIdx) => {
+                const ref = `${indexToColLetters(cIdx)}${rNum}`;
+                const sAttr = cell.style !== undefined ? ` s="${cell.style}"` : ' s="0"';
+                if (cell.v === '' || cell.v === null || cell.v === undefined) {
+                  return `<c r="${ref}"${sAttr}/>`;
+                }
+                if (typeof cell.v === 'number' && Number.isFinite(cell.v)) {
+                  return `<c r="${ref}"${sAttr}><v>${cell.v}</v></c>`;
+                }
+                const ssIdx = getSsIndex(cell.v);
+                return `<c r="${ref}"${sAttr} t="s"><v>${ssIdx}</v></c>`;
+              })
+              .join('');
+            return `<row r="${rNum}"${htAttr}>${cellsXml}</row>`;
+          })
+          .join('');
+
+        const mergeXml =
+          sh.merges.length > 0
+            ? `<mergeCells count="${sh.merges.length}">${sh.merges
+                .map((m) => `<mergeCell ref="${m}"/>`)
+                .join('')}</mergeCells>`
+            : '';
+
+        return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>
+  ${colsXml}
+  <sheetData>${rowsXml}</sheetData>
+  ${mergeXml}
+  <pageMargins left="0.35" right="0.35" top="0.4" bottom="0.4" header="0.2" footer="0.2"/>
+  <pageSetup paperSize="9" orientation="portrait" fitToWidth="1" fitToHeight="0"/>
+</worksheet>`;
+      });
+
+      const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="6">
+    <font><sz val="11"/><name val="Times New Roman"/></font>
+    <font><b/><sz val="11"/><name val="Times New Roman"/></font>
+    <font><b/><sz val="13"/><name val="Times New Roman"/></font>
+    <font><b/><sz val="10.5"/><name val="Times New Roman"/></font>
+    <font><sz val="10.5"/><name val="Times New Roman"/></font>
+    <font><i/><sz val="10.5"/><name val="Times New Roman"/></font>
+  </fonts>
+  <fills count="3">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFF1F5F9"/><bgColor indexed="64"/></patternFill></fill>
+  </fills>
+  <borders count="2">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border>
+      <left style="thin"><color auto="1"/></left>
+      <right style="thin"><color auto="1"/></right>
+      <top style="thin"><color auto="1"/></top>
+      <bottom style="thin"><color auto="1"/></bottom>
+      <diagonal/>
+    </border>
+  </borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="11">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyFont="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="5" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+    <xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment horizontal="left" vertical="center" wrapText="1"/></xf>
+  </cellXfs>
+</styleSheet>`;
+
+      const ssXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${sharedStrings.length}" uniqueCount="${sharedStrings.length}">
+  ${sharedStrings.map((s) => `<si><t xml:space="preserve">${escapeXml(s)}</t></si>`).join('')}
+</sst>`;
+
+      const workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    ${preparedSheets
+      .map((sh, i) => `<sheet name="${escapeXml(sh.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`)
+      .join('')}
+  </sheets>
+</workbook>`;
+
+      const workbookRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  ${preparedSheets
+    .map(
+      (_, i) =>
+        `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`
+    )
+    .join('')}
+  <Relationship Id="rId${preparedSheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+  <Relationship Id="rId${preparedSheets.length + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>
+</Relationships>`;
+
+      const rootRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`;
+
+      const contentTypesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  ${preparedSheets
+    .map(
+      (_, i) =>
+        `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`
+    )
+    .join('')}
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+  <Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
+</Types>`;
+
+      const zipFiles = [
+        { name: '[Content_Types].xml', data: encoder.encode(contentTypesXml) },
+        { name: '_rels/.rels', data: encoder.encode(rootRelsXml) },
+        { name: 'xl/workbook.xml', data: encoder.encode(workbookXml) },
+        { name: 'xl/_rels/workbook.xml.rels', data: encoder.encode(workbookRelsXml) },
+        { name: 'xl/styles.xml', data: encoder.encode(stylesXml) },
+        { name: 'xl/sharedStrings.xml', data: encoder.encode(ssXml) },
+        ...sheetXmlFiles.map((xml, idx) => ({
+          name: `xl/worksheets/sheet${idx + 1}.xml`,
+          data: encoder.encode(xml),
+        })),
+      ];
+
+      const zipBlob = createZipBlobStore(zipFiles);
+      triggerBlobDownload(zipBlob, filename);
+    }
+
+    // CRC-32 Lookup Table for valid ZIP headers
+    const CRC32_TABLE = (() => {
+      const table = new Uint32Array(256);
+      for (let i = 0; i < 256; i++) {
+        let c = i;
+        for (let k = 0; k < 8; k++) {
+          c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        }
+        table[i] = c >>> 0;
+      }
+      return table;
+    })();
+
+    function computeCrc32(bytes) {
+      let crc = 0xffffffff;
+      for (let i = 0; i < bytes.length; i++) {
+        crc = CRC32_TABLE[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+      }
+      return (crc ^ 0xffffffff) >>> 0;
+    }
+
+    function createZipBlobStore(files) {
+      const encoder = new TextEncoder();
+      const parts = [];
+      const centralDir = [];
+      let offset = 0;
+
+      for (const file of files) {
+        const nameBytes = encoder.encode(file.name);
+        const data = file.data;
+        const crc = computeCrc32(data);
+
+        const localHeader = new Uint8Array(30 + nameBytes.length);
+        const lv = new DataView(localHeader.buffer);
+        lv.setUint32(0, 0x04034b50, true);
+        lv.setUint16(4, 20, true);
+        lv.setUint16(6, 0x0800, true); // UTF-8 filename flag
+        lv.setUint16(8, 0, true); // STORE
+        lv.setUint16(10, 0, true);
+        lv.setUint16(12, 0x0021, true);
+        lv.setUint32(14, crc, true);
+        lv.setUint32(18, data.length, true);
+        lv.setUint32(22, data.length, true);
+        lv.setUint16(26, nameBytes.length, true);
+        lv.setUint16(28, 0, true);
+        localHeader.set(nameBytes, 30);
+
+        parts.push(localHeader, data);
+
+        const cdHeader = new Uint8Array(46 + nameBytes.length);
+        const cv = new DataView(cdHeader.buffer);
+        cv.setUint32(0, 0x02014b50, true);
+        cv.setUint16(4, 20, true);
+        cv.setUint16(6, 20, true);
+        cv.setUint16(8, 0x0800, true);
+        cv.setUint16(10, 0, true);
+        cv.setUint16(12, 0, true);
+        cv.setUint16(14, 0x0021, true);
+        cv.setUint32(16, crc, true);
+        cv.setUint32(20, data.length, true);
+        cv.setUint32(24, data.length, true);
+        cv.setUint16(28, nameBytes.length, true);
+        cv.setUint16(30, 0, true);
+        cv.setUint16(32, 0, true);
+        cv.setUint16(34, 0, true);
+        cv.setUint16(36, 0, true);
+        cv.setUint32(38, 0, true);
+        cv.setUint32(42, offset, true);
+        cdHeader.set(nameBytes, 46);
+
+        centralDir.push(cdHeader);
+        offset += localHeader.length + data.length;
+      }
+
+      const cdSize = centralDir.reduce((s, b) => s + b.length, 0);
+      const eocd = new Uint8Array(22);
+      const ev = new DataView(eocd.buffer);
+      ev.setUint32(0, 0x06054b50, true);
+      ev.setUint16(4, 0, true);
+      ev.setUint16(6, 0, true);
+      ev.setUint16(8, files.length, true);
+      ev.setUint16(10, files.length, true);
+      ev.setUint32(12, cdSize, true);
+      ev.setUint32(16, offset, true);
+      ev.setUint16(20, 0, true);
+
+      return new Blob([...parts, ...centralDir, eocd], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+    }
+
+    function triggerBlobDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(url);
+      }, 250);
+    }
+
+    /* ==========================================================================
+       MODULE I: SPECIFIC EXCEL EXPORTS (7 REPORTS + SAMPLE TEMPLATE)
+       ========================================================================== */
+    function exportSampleTemplateXlsx() {
+      const sample = generateSampleStudents123(false).slice(0, 15);
+      const rows = [
+        {
+          height: 24,
+          cells: [
+            { v: 'STT', style: 5 },
+            { v: 'SBD', style: 5 },
+            { v: 'Họ và tên', style: 5 },
+            { v: 'Ngày sinh', style: 5 },
+            { v: 'Giới tính', style: 5 },
+            { v: 'Lớp', style: 5 },
+            { v: 'Môn tự chọn 1', style: 5 },
+            { v: 'Môn tự chọn 2', style: 5 },
+          ],
+        },
+        ...sample.map((st, idx) => ({
+          height: 20,
+          cells: [
+            { v: idx + 1, style: 6 },
+            { v: st.sbd, style: 6 },
+            { v: st.fullName, style: 7 },
+            { v: st.dob, style: 6 },
+            { v: st.gender, style: 6 },
+            { v: st.className, style: 6 },
+            { v: st.sub1, style: 6 },
+            { v: st.sub2, style: 6 },
+          ],
+        })),
+      ];
+
+      buildAndDownloadXlsx(
+        [
+          {
+            name: 'Danh_Sach_Mau',
+            colWidths: [7, 14, 26, 14, 11, 10, 16, 16],
+            rows,
+          },
+        ],
+        'Mau_Danh_Sach_Dang_Ky_THPT.xlsx'
+      );
+      showToast('Đã tải xuống tệp mẫu Excel chuẩn (.xlsx)!', 'success');
+    }
+
+    function exportCouncilFullListXlsx() {
+      if (state.rooms.length === 0) return showToast('Vui lòng chạy sắp xếp phòng thi trước!', 'warning');
+      const cfg = getCouncilConfig();
+      const records = getSortedCouncilRecords();
+
+      const rows = [
+        {
+          height: 20,
+          cells: [
+            { v: cfg.deptName.toUpperCase(), style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+          ],
+        },
+        {
+          height: 20,
+          cells: [
+            { v: cfg.councilName, style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: 'Độc lập - Tự do - Hạnh phúc', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+          ],
+        },
+        {
+          height: 26,
+          cells: [
+            { v: 'DANH SÁCH THÍ SINH TOÀN HỘI ĐỒNG COI THI', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+          ],
+        },
+        {
+          height: 20,
+          cells: [
+            { v: `${cfg.examTitle} (${cfg.sessionDate})`, style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+          ],
+        },
+        { height: 10, cells: [] },
+        {
+          height: 26,
+          cells: [
+            { v: 'TT', style: 5 },
+            { v: 'Số báo danh', style: 5 },
+            { v: 'Họ và tên', style: 5 },
+            { v: 'Ngày sinh', style: 5 },
+            { v: 'Lớp', style: 5 },
+            { v: 'Môn tự chọn', style: 5 },
+            { v: 'Phòng thi', style: 5 },
+            { v: 'Số thứ tự trong phòng', style: 5 },
+          ],
+        },
+        ...records.map((st, idx) => ({
+          height: 20,
+          cells: [
+            { v: idx + 1, style: 6 },
+            { v: st.sbd, style: 6 },
+            { v: st.fullName, style: 7 },
+            { v: st.dob, style: 6 },
+            { v: st.className, style: 6 },
+            { v: st.electivePairLabel, style: 6 },
+            { v: st.roomLabel, style: 6 },
+            { v: st.seatNumber, style: 6 },
+          ],
+        })),
+      ];
+
+      buildAndDownloadXlsx(
+        [
+          {
+            name: 'DS_Toan_Hoi_Dong',
+            colWidths: [7, 15, 27, 14, 11, 22, 13, 18],
+            merges: ['A1:C1', 'D1:H1', 'A2:C2', 'D2:H2', 'A3:H3', 'A4:H4'],
+            rows,
+          },
+        ],
+        'Danh_Sach_Toan_Hoi_Dong.xlsx'
+      );
+      showToast('Đã xuất file Danh_Sach_Toan_Hoi_Dong.xlsx (8 cột)!', 'success');
+    }
+
+    function buildPostingRoomRows(room, cfg) {
+      const startRow = 1;
+      const rows = [
+        {
+          height: 20,
+          cells: [
+            { v: cfg.deptName.toUpperCase(), style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+          ],
+        },
+        {
+          height: 20,
+          cells: [
+            { v: cfg.councilName, style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: 'Độc lập - Tự do - Hạnh phúc', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+          ],
+        },
+        {
+          height: 25,
+          cells: [
+            { v: 'DANH SÁCH THÍ SINH DỰ THI', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+          ],
+        },
+        {
+          height: 20,
+          cells: [
+            { v: `${cfg.examTitle} • ${room.roomLabel.toUpperCase()} (${cfg.sessionDate})`, style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+          ],
+        },
+        { height: 8, cells: [] },
+        {
+          height: 25,
+          cells: [
+            { v: 'STT', style: 5 },
+            { v: 'Số báo danh', style: 5 },
+            { v: 'Họ và tên', style: 5 },
+            { v: 'Ngày sinh', style: 5 },
+            { v: 'Giới tính', style: 5 },
+            { v: 'Lớp', style: 5 },
+            { v: 'Môn tự chọn', style: 5 },
+          ],
+        },
+        ...room.students.map((st) => ({
+          height: 20,
+          cells: [
+            { v: st.seatNumber, style: 6 },
+            { v: st.sbd, style: 6 },
+            { v: st.fullName, style: 7 },
+            { v: st.dob, style: 6 },
+            { v: st.gender, style: 6 },
+            { v: st.className, style: 6 },
+            { v: st.electivePairLabel, style: 6 },
+          ],
+        })),
+        {
+          height: 20,
+          cells: [{ v: `Danh sách này gồm có: ${room.students.length} thí sinh.`, style: 10 }],
+        },
+        {
+          height: 19,
+          cells: [
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: `Ngày ..... tháng ..... năm ${cfg.examYear}`, style: 8 },
+          ],
+        },
+        {
+          height: 19,
+          cells: [
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: 'CHỦ TỊCH HỘI ĐỒNG COI THI', style: 9 },
+          ],
+        },
+        { height: 34, cells: [] },
+        {
+          height: 20,
+          cells: [
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: cfg.chairName || '........................................', style: 9 },
+          ],
+        },
+      ];
+
+      const footIdx = 7 + room.students.length;
+      const merges = [
+        `A${startRow}:C${startRow}`,
+        `D${startRow}:G${startRow}`,
+        `A${startRow + 1}:C${startRow + 1}`,
+        `D${startRow + 1}:G${startRow + 1}`,
+        `A${startRow + 2}:G${startRow + 2}`,
+        `A${startRow + 3}:G${startRow + 3}`,
+        `A${footIdx}:G${footIdx}`,
+        `D${footIdx + 1}:G${footIdx + 1}`,
+        `D${footIdx + 2}:G${footIdx + 2}`,
+        `D${footIdx + 4}:G${footIdx + 4}`,
+      ];
+
+      return { rows, merges };
+    }
+
+    function exportPostingListXlsx() {
+      if (state.rooms.length === 0) return showToast('Vui lòng chạy sắp xếp phòng thi trước!', 'warning');
+      const cfg = getCouncilConfig();
+      const colWidths = [7, 15, 27, 14, 10, 10, 22];
+
+      if (cfg.sheetLayout === 'per_room') {
+        const sheets = state.rooms.map((r) => {
+          const { rows, merges } = buildPostingRoomRows(r, cfg);
+          return { name: `Phong_${r.roomNumberPadded}`, colWidths, merges, rows };
+        });
+        buildAndDownloadXlsx(sheets, 'Danh_Sach_Niem_Yet_Phong_Thi.xlsx');
+      } else {
+        const allRows = [];
+        const allMerges = [];
+        state.rooms.forEach((r, idx) => {
+          const offset = allRows.length;
+          const { rows, merges } = buildPostingRoomRows(r, cfg);
+          allRows.push(...rows);
+          for (const m of merges) {
+            allMerges.push(
+              m.replace(/([A-Z]+)(\d+)/g, (_, col, rowStr) => `${col}${Number(rowStr) + offset}`)
+            );
+          }
+          if (idx < state.rooms.length - 1) {
+            allRows.push({ height: 18, cells: [] }, { height: 18, cells: [] });
+          }
+        });
+        buildAndDownloadXlsx(
+          [{ name: 'DS_Niem_Yet_Tat_Ca', colWidths, merges: allMerges, rows: allRows }],
+          'Danh_Sach_Niem_Yet_Phong_Thi.xlsx'
+        );
+      }
+      showToast('Đã xuất file Danh_Sach_Niem_Yet_Phong_Thi.xlsx!', 'success');
+    }
+
+    function buildReceiptRoomRows(room, sessionKind, cfg) {
+      const titleMap = {
+        van: 'PHIẾU THU BÀI THI - MÔN: NGỮ VĂN',
+        toan: 'PHIẾU THU BÀI THI - MÔN: TOÁN',
+        elective_merged: 'PHIẾU THU BÀI THI - BÀI THI TỰ CHỌN (CA 1 & CA 2)',
+        elective_ca1: 'PHIẾU THU BÀI THI - BÀI THI TỰ CHỌN (CA 1)',
+        elective_ca2: 'PHIẾU THU BÀI THI - BÀI THI TỰ CHỌN (CA 2)',
+      };
+      const col8Header = sessionKind === 'van' ? 'Số tờ' : 'Mã đề / Số tờ';
+
+      const rows = [
+        {
+          height: 20,
+          cells: [
+            { v: cfg.deptName.toUpperCase(), style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+          ],
+        },
+        {
+          height: 20,
+          cells: [
+            { v: cfg.councilName, style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: 'Độc lập - Tự do - Hạnh phúc', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+            { v: '', style: 1 },
+          ],
+        },
+        {
+          height: 24,
+          cells: [
+            { v: titleMap[sessionKind] || 'PHIẾU THU BÀI THI', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+          ],
+        },
+        {
+          height: 20,
+          cells: [
+            { v: `${cfg.examTitle} • ${room.roomLabel.toUpperCase()} (${cfg.sessionDate})`, style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+            { v: '', style: 4 },
+          ],
+        },
+        { height: 8, cells: [] },
+        {
+          height: 25,
+          cells: [
+            { v: 'STT', style: 5 },
+            { v: 'SBD', style: 5 },
+            { v: 'Họ và tên', style: 5 },
+            { v: 'Ngày sinh', style: 5 },
+            { v: 'Giới tính', style: 5 },
+            { v: 'Lớp', style: 5 },
+            { v: 'Môn thi', style: 5 },
+            { v: col8Header, style: 5 },
+            { v: 'Ký nộp', style: 5 },
+            { v: 'Ghi chú', style: 5 },
+          ],
+        },
+        ...room.students.map((st) => {
+          let subVal = 'Ngữ văn';
+          let noteVal = '';
+          if (sessionKind === 'toan') {
+            subVal = 'Toán';
+          } else if (sessionKind === 'elective_merged') {
+            subVal = st.electivePairLabel;
+          } else if (sessionKind === 'elective_ca1') {
+            if (st.ca1Subject) {
+              subVal = st.ca1Subject;
+              if (st.isSingleElective) noteVal = 'TS tự do (1 môn)';
+            } else {
+              subVal = 'Không thi';
+              noteVal = 'TS tự do (thi Ca 2)';
+            }
+          } else if (sessionKind === 'elective_ca2') {
+            if (st.ca2Subject) {
+              subVal = st.ca2Subject;
+              if (st.isSingleElective) noteVal = 'TS tự do (1 môn)';
+            } else {
+              subVal = 'Không thi';
+              noteVal = 'TS tự do (thi Ca 1)';
+            }
+          }
+
+          return {
+            height: 20,
+            cells: [
+              { v: st.seatNumber, style: 6 },
+              { v: st.sbd, style: 6 },
+              { v: st.fullName, style: 7 },
+              { v: st.dob, style: 6 },
+              { v: st.gender, style: 6 },
+              { v: st.className, style: 6 },
+              { v: subVal, style: 6 },
+              { v: '', style: 6 },
+              { v: '', style: 6 },
+              { v: noteVal, style: 6 },
+            ],
+          };
+        }),
+        {
+          height: 20,
+          cells: [
+            {
+              v: `Tổng số TS: ${room.students.length}   |   Có mặt: ..........   |   Vắng mặt: ..........   |   Tổng số bài thu được: .......... bài (.......... tờ)`,
+              style: 10,
+            },
+          ],
+        },
+        {
+          height: 19,
+          cells: [
+            { v: 'GIÁM THỊ 1', style: 9 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: 'GIÁM THỊ 2', style: 9 },
+          ],
+        },
+        {
+          height: 18,
+          cells: [
+            { v: '(Ký và ghi rõ họ tên)', style: 8 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: '', style: 0 },
+            { v: '(Ký và ghi rõ họ tên)', style: 8 },
+          ],
+        },
+        { height: 34, cells: [] },
+      ];
+
+      const footIdx = 7 + room.students.length;
+      const merges = [
+        'A1:C1',
+        'D1:J1',
+        'A2:C2',
+        'D2:J2',
+        'A3:J3',
+        'A4:J4',
+        `A${footIdx}:J${footIdx}`,
+        `A${footIdx + 1}:E${footIdx + 1}`,
+        `F${footIdx + 1}:J${footIdx + 1}`,
+        `A${footIdx + 2}:E${footIdx + 2}`,
+        `F${footIdx + 2}:J${footIdx + 2}`,
+      ];
+
+      return { rows, merges };
+    }
+
+    function exportReceiptByKinds(kinds, filename, labelToast) {
+      if (state.rooms.length === 0) return showToast('Vui lòng chạy sắp xếp phòng thi trước!', 'warning');
+      const cfg = getCouncilConfig();
+      const colWidths = [6, 13, 24, 12, 8, 8, 18, 12, 10, 14];
+      const kindShortName = {
+        van: 'Van',
+        toan: 'Toan',
+        elective_merged: 'TuChon',
+        elective_ca1: 'TuChon_Ca1',
+        elective_ca2: 'TuChon_Ca2',
+      };
+
+      const sheets = [];
+      if (cfg.sheetLayout === 'per_room') {
+        for (const k of kinds) {
+          for (const r of state.rooms) {
+            const { rows, merges } = buildReceiptRoomRows(r, k, cfg);
+            sheets.push({
+              name: `P${r.roomNumberPadded}_${kindShortName[k] || k}`,
+              colWidths,
+              merges,
+              rows,
+            });
+          }
+        }
+      } else {
+        for (const k of kinds) {
+          const allRows = [];
+          const allMerges = [];
+          state.rooms.forEach((r, idx) => {
+            const offset = allRows.length;
+            const { rows, merges } = buildReceiptRoomRows(r, k, cfg);
+            allRows.push(...rows);
+            for (const m of merges) {
+              allMerges.push(
+                m.replace(/([A-Z]+)(\d+)/g, (_, col, rowStr) => `${col}${Number(rowStr) + offset}`)
+              );
+            }
+            if (idx < state.rooms.length - 1) {
+              allRows.push({ height: 18, cells: [] }, { height: 18, cells: [] });
+            }
+          });
+          sheets.push({
+            name: `PhieuThuBai_${kindShortName[k] || k}`,
+            colWidths,
+            merges: allMerges,
+            rows: allRows,
+          });
+        }
+      }
+
+      buildAndDownloadXlsx(sheets, filename);
+      showToast(`Đã xuất file ${labelToast}!`, 'success');
+    }
+
+    function exportSummaryEnvelopesXlsx() {
+      if (state.rooms.length === 0) return showToast('Vui lòng chạy sắp xếp phòng thi trước!', 'warning');
+      const cfg = getCouncilConfig();
+
+      const rows = [
+        {
+          height: 24,
+          cells: [
+            { v: `BẢNG TỔNG HỢP PHÂN PHÒNG & CHIA TÚI ĐỀ TỰ CHỌN - ${cfg.examTitle}`, style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+            { v: '', style: 3 },
+          ],
+        },
+        {
+          height: 26,
+          cells: [
+            { v: 'Phòng thi', style: 5 },
+            { v: 'Sĩ số', style: 5 },
+            { v: 'Phân loại', style: 5 },
+            { v: 'Các tổ hợp đăng ký trong phòng', style: 5 },
+            { v: 'Túi đề Ca 1 (50 phút)', style: 5 },
+            { v: 'Túi đề Ca 2 (50 phút)', style: 5 },
+            { v: 'Tỷ lệ gom túi đề', style: 5 },
+          ],
+        },
+        ...state.rooms.map((r) => {
+          const pairsStr = r.distinctPairs
+            .map((p) =>
+              p.isSingleElective
+                ? `${p.pair[0]} [1 môn tự do] (${p.count})`
+                : `${p.pair[0]} - ${p.pair[1]} (${p.count})`
+            )
+            .join('; ');
+          const ca1Str = r.ca1Summary.map(([sub, cnt]) => `${sub}: ${cnt}`).join(', ') || 'Không có';
+          const ca2Str = r.ca2Summary.map(([sub, cnt]) => `${sub}: ${cnt}`).join(', ') || 'Không có';
+
+          return {
+            height: 24,
+            cells: [
+              { v: r.roomLabel, style: 6 },
+              { v: r.students.length, style: 6 },
+              { v: r.isPure ? 'Phòng thuần' : 'Phòng ghép', style: 6 },
+              { v: pairsStr, style: 7 },
+              { v: ca1Str, style: 7 },
+              { v: ca2Str, style: 7 },
+              { v: `${r.homogeneityPct}%`, style: 6 },
+            ],
+          };
+        }),
+      ];
+
+      buildAndDownloadXlsx(
+        [
+          {
+            name: 'Tong_Hop_Tui_De',
+            colWidths: [13, 9, 14, 34, 24, 24, 15],
+            merges: ['A1:G1'],
+            rows,
+          },
+        ],
+        'Tong_Hop_Phan_Phong_Va_Tui_De.xlsx'
+      );
+      showToast('Đã xuất file Tong_Hop_Phan_Phong_Va_Tui_De.xlsx!', 'success');
+    }
+
+    /* ==========================================================================
+       MODULE J: LOCALSTORAGE DRAFT PERSISTENCE & JSON PROJECT IMPORT/EXPORT
+       ========================================================================== */
+    function updateDraftStatusIndicator() {
+      const dot = document.getElementById('draftStatusDot');
+      const txt = document.getElementById('draftStatusText');
+      if (!dot || !txt) return;
+      if (state.lastSavedAt) {
+        dot.classList.add('saved');
+        txt.textContent = `Đã lưu nháp • ${state.lastSavedAt}`;
+      } else {
+        dot.classList.remove('saved');
+        txt.textContent = 'Chưa có bản nháp';
+      }
+    }
+
+    function buildSerializablePayload(includeRaw = true) {
+      return {
+        version: '3.0-offline',
+        savedAt: new Date().toISOString(),
+        config: getCouncilConfig(),
+        uploadedFileName: state.uploadedFileName,
+        headerRowIndex: state.headerRowIndex,
+        headers: state.headers,
+        colMap: state.colMap,
+        rawRows: includeRaw ? state.rawRows : [],
+        studentsValid: state.studentsValid,
+        studentsInvalid: state.studentsInvalid,
+        rooms: state.rooms,
+        tailBalancedInfo: state.tailBalancedInfo,
+        activeTab: state.activeTab,
+      };
+    }
+
+    function saveDraftToLocalStorage() {
+      try {
+        const nowStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const payload = buildSerializablePayload(true);
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        } catch (quotaErr) {
+          // Retry without rawRows if storage quota is tight
+          const compact = buildSerializablePayload(false);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(compact));
+        }
+        state.lastSavedAt = nowStr;
+        updateDraftStatusIndicator();
+      } catch (err) {
+        console.warn('Không thể lưu nháp vào localStorage:', err);
+      }
+    }
+
+    function restoreStateFromPayload(d) {
+      if (!d || typeof d !== 'object') return false;
+      applyConfigToDOM(d.config || {});
+      state.uploadedFileName = d.uploadedFileName || '';
+      state.headerRowIndex = Number.isFinite(d.headerRowIndex) ? d.headerRowIndex : 0;
+      state.headers = Array.isArray(d.headers) ? d.headers : [];
+      state.colMap = d.colMap || state.colMap;
+      state.rawRows = Array.isArray(d.rawRows) ? d.rawRows : [];
+      state.studentsValid = Array.isArray(d.studentsValid) ? d.studentsValid : [];
+      state.studentsInvalid = Array.isArray(d.studentsInvalid) ? d.studentsInvalid : [];
+      state.rooms = Array.isArray(d.rooms) ? d.rooms : [];
+      state.tailBalancedInfo = d.tailBalancedInfo || null;
+      state.activeTab = d.activeTab || 'seats';
+
+      if (state.headers.length > 0 || state.studentsValid.length > 0) {
+        document.getElementById('uploadedFileName').textContent = state.uploadedFileName || 'Dữ liệu đã khôi phục';
+        populateMappingSelects();
+        renderValidationBox();
+      }
+
+      if (state.rooms.length > 0) {
+        document.getElementById('resultsSection').classList.remove('hidden');
+        populateFiltersAndSelectors();
+        switchTab(state.activeTab);
+        renderKpis();
+      } else {
+        document.getElementById('resultsSection').classList.add('hidden');
+      }
+      updateSbdLivePreview();
+      return true;
+    }
+
+    function loadDraftFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (restoreStateFromPayload(parsed)) {
+          state.lastSavedAt = parsed.savedAt
+            ? new Date(parsed.savedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            : 'Đã khôi phục';
+          updateDraftStatusIndicator();
+        }
+      } catch (err) {
+        console.warn('Không thể đọc bản nháp từ localStorage:', err);
+      }
+    }
+
+    function clearDraftAndReset() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (_) {}
+
+      state.parsedWorkbook = null;
+      state.uploadedFileName = '';
+      state.rawRows = [];
+      state.headers = [];
+      state.studentsValid = [];
+      state.studentsInvalid = [];
+      state.rooms = [];
+      state.tailBalancedInfo = null;
+      state.searchQuery = '';
+      state.filterRoom = 'ALL';
+      state.filterSubject = 'ALL';
+      state.lastSavedAt = null;
+
+      document.getElementById('mappingSection').classList.add('hidden');
+      document.getElementById('sheetSelectorWrap').classList.add('hidden');
+      document.getElementById('resultsSection').classList.add('hidden');
+      document.getElementById('fileInput').value = '';
+      updateDraftStatusIndicator();
+      updateSbdLivePreview();
+      showToast('Đã xóa bản nháp và làm mới không gian làm việc.', 'info');
+    }
+
+    function exportProjectJson() {
+      const cfg = getCouncilConfig();
+      const safeCouncil = (cfg.councilName || 'THPT')
+        .replace(/[^a-zA-Z0-9\u00C0-\u1EF9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 25) || 'THPT';
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      const payload = buildSerializablePayload(true);
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+      triggerBlobDownload(blob, `Du_An_Phong_Thi_${safeCouncil}_${dateStamp}.json`);
+      showToast('Đã xuất tệp Kỳ thi (.json)!', 'success');
+    }
+
+    function importProjectJsonText(text) {
+      try {
+        const parsed = JSON.parse(text);
+        if (!restoreStateFromPayload(parsed)) {
+          throw new Error('Cấu trúc tệp Kỳ thi không hợp lệ.');
+        }
+        saveDraftToLocalStorage();
+        showToast('Đã khôi phục Kỳ thi thành công!', 'success');
+      } catch (err) {
+        showToast(`Lỗi mở tệp Kỳ thi: ${err.message}`, 'error');
+      }
+    }
+
+    /* ==========================================================================
+       MODULE K: EVENT LISTENERS & INITIALIZATION
+       ========================================================================== */
+    function loadSampleDataIntoApp(withoutSbd = false) {
+      const sampleList = generateSampleStudents123(withoutSbd);
+      const matrix = [
+        ['STT', 'SBD', 'Họ và tên', 'Ngày sinh', 'Giới tính', 'Lớp', 'Môn tự chọn 1', 'Môn tự chọn 2'],
+        ...sampleList.map((s, idx) => [idx + 1, s.sbd, s.fullName, s.dob, s.gender, s.className, s.sub1, s.sub2]),
+      ];
+
+      state.parsedWorkbook = null;
+      document.getElementById('sheetSelectorWrap').classList.add('hidden');
+      const label = withoutSbd
+        ? 'Đang dùng: Bộ dữ liệu mẫu 123 thí sinh (Có TS tự do 1 môn • Chưa có SBD)'
+        : 'Đang dùng: Bộ dữ liệu mẫu 123 thí sinh (Gồm 120 TS 2 môn + 3 TS tự do 1 môn)';
+      loadSheetMatrix(matrix, label);
+      saveDraftToLocalStorage();
+      showToast('Đã nạp 123 thí sinh mẫu (bao gồm thí sinh tự do thi 1 môn)!', 'success');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // File Dropzone & Upload
+      const dropZone = document.getElementById('dropZone');
+      const fileInput = document.getElementById('fileInput');
+
+      dropZone.addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          fileInput.click();
+        }
+      });
+
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer?.files?.[0]) {
+          handleFileUpload(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files?.[0]) {
+          handleFileUpload(e.target.files[0]);
+        }
+      });
+
+      // Sheet selector change
+      document.getElementById('sheetSelect').addEventListener('change', (e) => {
+        const sheetName = e.target.value;
+        if (state.parsedWorkbook && state.parsedWorkbook.sheets[sheetName]) {
+          loadSheetMatrix(state.parsedWorkbook.sheets[sheetName], `Trang tính: ${sheetName}`);
+          saveDraftToLocalStorage();
+        }
+      });
+
+      // Re-apply column mapping
+      document.getElementById('btnReapplyMap').addEventListener('click', () => {
+        readMappingFromUI();
+        applyColumnMapping();
+        saveDraftToLocalStorage();
+        showToast('Đã cập nhật ánh xạ cột dữ liệu.', 'info');
+      });
+
+      // Sample & Template buttons
+      document.getElementById('btnDownloadTemplate').addEventListener('click', exportSampleTemplateXlsx);
+      document.getElementById('btnLoadSample').addEventListener('click', () => loadSampleDataIntoApp(false));
+      document.getElementById('btnLoadSampleNoSbd').addEventListener('click', () => loadSampleDataIntoApp(true));
+
+      // SBD live preview & immediate apply
+      ['sbdMode', 'sbdOrderRule', 'sbdPrefix', 'sbdStart', 'sbdDigits', 'sbdSuffix'].forEach((id) => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', () => {
+          updateSbdLivePreview();
+          saveDraftToLocalStorage();
+        });
+        el.addEventListener('change', () => {
+          updateSbdLivePreview();
+          saveDraftToLocalStorage();
+        });
+      });
+
+      document.getElementById('btnApplySbdNow').addEventListener('click', () => {
+        if (state.studentsValid.length === 0) {
+          showToast('Chưa có danh sách thí sinh để đánh Số báo danh!', 'warning');
+          return;
+        }
+        const cfg = getCouncilConfig();
+        if (cfg.sbdMode === 'keep') {
+          showToast('Chế độ SBD đang chọn "Chỉ giữ nguyên SBD từ file gốc". Hãy đổi sang Tự động hoặc Ghi đè để đánh SBD!', 'warning');
+          return;
+        }
+        const count = applySbdNumberingToCollection(state.studentsValid, state.rooms);
+        renderValidationBox();
+        if (state.rooms.length > 0) renderAllResults();
+        saveDraftToLocalStorage();
+        showToast(`Đã cập nhật Số báo danh cho ${count} thí sinh!`, 'success');
+      });
+
+      // Council config auto-save & live preview refresh
+      ['cfgDeptName', 'cfgCouncilName', 'cfgExamTitle', 'cfgSessionDate', 'cfgChairName', 'cfgExamYear'].forEach((id) => {
+        document.getElementById(id).addEventListener('input', () => {
+          if (state.activeTab === 'preview' && state.rooms.length > 0) renderPrintPreview(false);
+          saveDraftToLocalStorage();
+        });
+      });
+
+      ['cfgReceiptMode', 'cfgSheetLayout', 'maxPerRoom', 'cfgBalanceTailRooms'].forEach((id) => {
+        document.getElementById(id).addEventListener('change', () => {
+          if (state.activeTab === 'preview' && state.rooms.length > 0) renderPrintPreview(false);
+          saveDraftToLocalStorage();
+        });
+      });
+
+      document.getElementById('cfgCouncilSortOrder').addEventListener('change', () => {
+        if (state.activeTab === 'council_list' && state.rooms.length > 0) renderCouncilListView();
+        saveDraftToLocalStorage();
+      });
+
+      // Main scheduling button
+      document.getElementById('btnRunSchedule').addEventListener('click', runSchedulingAlgorithm);
+
+      // Export buttons
+      document.getElementById('btnExportCouncilList').addEventListener('click', exportCouncilFullListXlsx);
+      document.getElementById('btnExportPostingList').addEventListener('click', exportPostingListXlsx);
+      document.getElementById('btnExportReceiptVan').addEventListener('click', () =>
+        exportReceiptByKinds(['van'], 'Phieu_Thu_Bai_Ngu_Van.xlsx', 'Phieu_Thu_Bai_Ngu_Van.xlsx')
+      );
+      document.getElementById('btnExportReceiptToan').addEventListener('click', () =>
+        exportReceiptByKinds(['toan'], 'Phieu_Thu_Bai_Toan.xlsx', 'Phieu_Thu_Bai_Toan.xlsx')
+      );
+      document.getElementById('btnExportReceiptElective').addEventListener('click', () => {
+        const cfg = getCouncilConfig();
+        const kinds = cfg.receiptMode === 'split_shifts' ? ['elective_ca1', 'elective_ca2'] : ['elective_merged'];
+        exportReceiptByKinds(kinds, 'Phieu_Thu_Bai_Tu_Chon.xlsx', 'Phieu_Thu_Bai_Tu_Chon.xlsx');
+      });
+      document.getElementById('btnExportReceiptAll').addEventListener('click', () => {
+        const cfg = getCouncilConfig();
+        const kinds =
+          cfg.receiptMode === 'split_shifts'
+            ? ['van', 'toan', 'elective_ca1', 'elective_ca2']
+            : ['van', 'toan', 'elective_merged'];
+        exportReceiptByKinds(
+          kinds,
+          'Tron_Bo_Phieu_Thu_Bai_Van_Toan_Tu_Chon.xlsx',
+          'Tron_Bo_Phieu_Thu_Bai_Van_Toan_Tu_Chon.xlsx'
+        );
+      });
+      document.getElementById('btnExportSummary').addEventListener('click', exportSummaryEnvelopesXlsx);
+
+      // Workspace Tabs & Filters
+      document.querySelectorAll('.tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      document.getElementById('filterRoom').addEventListener('change', (e) => {
+        state.filterRoom = e.target.value;
+        if (state.filterRoom !== 'ALL') {
+          document.getElementById('previewRoomSelect').value = state.filterRoom;
+        }
+        renderAllResults();
+      });
+
+      document.getElementById('filterSubject').addEventListener('change', (e) => {
+        state.filterSubject = e.target.value;
+        renderAllResults();
+      });
+
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        state.searchQuery = e.target.value.trim();
+        renderAllResults();
+      });
+
+      // A4 Preview controls
+      document.getElementById('previewFormType').addEventListener('change', () => renderPrintPreview(false));
+      document.getElementById('previewRoomSelect').addEventListener('change', () => renderPrintPreview(false));
+      document.getElementById('btnPrintCurrentRoom').addEventListener('click', () => triggerDirectPrint(false));
+      document.getElementById('btnPrintAllRooms').addEventListener('click', () => triggerDirectPrint(true));
+
+      // Project JSON & Draft Modal
+      document.getElementById('btnExportProject').addEventListener('click', exportProjectJson);
+      document.getElementById('projectInput').addEventListener('change', async (e) => {
+        const f = e.target.files?.[0];
+        if (f) {
+          const txt = await f.text();
+          importProjectJsonText(txt);
+          e.target.value = '';
+        }
+      });
+
+      const confirmModal = document.getElementById('confirmModal');
+      document.getElementById('btnClearDraft').addEventListener('click', () => {
+        confirmModal.classList.remove('hidden');
+      });
+      document.getElementById('btnCancelClear').addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+      });
+      document.getElementById('btnConfirmClear').addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+        clearDraftAndReset();
+      });
+
+      // Restore previous draft on load
+      updateSbdLivePreview();
+      loadDraftFromLocalStorage();
+    });
+  </script>
+</body>
+</html>
